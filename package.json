@@ -1,0 +1,9 @@
+{
+  "name": "api-crawler",
+  "version": "0.0.1",
+  "description": "A crawler for Popcorn Time's API",
+  "main": "index.js",
+  "author": "Paulo Santana",
+  "license": "MIT",
+  "private": true
+}
