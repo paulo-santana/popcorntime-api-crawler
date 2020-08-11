@@ -5,7 +5,11 @@ import apiResources from './apiResources'
 
 export class MoviesApiStub implements IMoviesApi {
   pages = ['movies/1', 'movies/2', 'movies/3']
-
+  movies: PopcornMovie[] = new Array<PopcornMovie>().concat(
+    ...apiResources['movies/1'],
+    ...apiResources['movies/2'],
+    ...apiResources['movies/3']
+  )
   getStatus(): Promise<PopcornApiStatus> {
     const statusStub: PopcornApiStatus = apiStatusStub
     return new Promise(resolve => resolve(statusStub))

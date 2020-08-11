@@ -103,6 +103,16 @@ describe('Crawler', () => {
           config.apiClients.moviesApi.pages.length
         )
       })
+
+      it('should adapt all movies from PopcornMovie to Movie model', async () => {
+        const { crawler, config } = makeSut()
+        const adaptMovies = jest.spyOn(
+          config.popcornMovieAdapter,
+          'adaptMovies'
+        )
+        await crawler.start()
+        expect(adaptMovies).toBeCalledTimes(1)
+      })
     })
   })
 })
