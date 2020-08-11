@@ -1,9 +1,9 @@
 import { IMoviesApi, IPopcornTimeStatusApi } from '@/data/api'
 import PopcornMovieAdapter from '@/data/helpers/PopcornMovieAdapter'
 import { Movie } from '@/data/models/Movie'
-import { MovieRepository } from '@/data/repositories'
+import { IMovieRepository } from '@/data/repositories'
 import { PopcornApiStatus, IPopcornTimeApi } from '@/services'
-import { Slugger } from '@/utils'
+import { ISlugger } from '@/utils'
 import { PopcornMovie } from '@/services/popcornTimeTypes'
 
 export enum CrawlerStatus {
@@ -20,8 +20,8 @@ export type ApiClientTypes = {
 
 export type CrawlerConfig = {
   apiClients: ApiClientTypes
-  slugger: Slugger
-  movieRepository: MovieRepository
+  slugger: ISlugger
+  movieRepository: IMovieRepository
   popcornMovieAdapter: PopcornMovieAdapter
 }
 
@@ -30,8 +30,8 @@ export class Crawler {
   private lastApiStatus?: PopcornApiStatus
 
   private apiClients: ApiClientTypes
-  private slugger: Slugger
-  private movieRepository: MovieRepository
+  private slugger: ISlugger
+  private movieRepository: IMovieRepository
   private popcornMovieAdapter: PopcornMovieAdapter
   lastUpdate = 0
 
@@ -78,26 +78,28 @@ export class Crawler {
     const pages = await moviesApi.getPages()
 
     const popcornMovies: PopcornMovie[] = []
-    pages.forEach(async page => {
+    for (let i = 0; i < pages.length; i++) {
+      const page = pages[i]
+      // eslint-disable-next-line no-await-in-loop
       const foundMovies = await moviesApi.getByPage(page)
       popcornMovies.push(...foundMovies)
-    })
+    }
 
     const movies = this.popcornMovieAdapter.adaptMovies(popcornMovies)
-    // const newMovies = this.filterNewMovies(movies)
-    // const sluggedMovies = this.slugifyMovies(newMovies)
-    // this.movieRepository.saveMany(sluggedMovies)
+    const newMovies = this.filterNewMovies(movies)
+    const sluggedMovies = this.slugifyMovies(newMovies)
+    this.movieRepository.saveMany(sluggedMovies)
   }
 
   private filterNewMovies(movies: Movie[]): Movie[] {
     return movies
   }
 
-  private slugifyMovies(movies: Movie[]): Movie[] {
+  slugifyMovies(movies: Movie[]): Movie[] {
     const sluggedMovies = movies.map(movie => {
-      const sluggedMovie = { ...movie }
+      const sluggedMovie: Movie = { ...movie }
       sluggedMovie.slug = this.slugger.slug(movie.title)
-      return movie
+      return sluggedMovie
     })
     return sluggedMovies
   }
