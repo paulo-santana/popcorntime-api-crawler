@@ -1,9 +1,10 @@
-import { AnimesApi, MoviesApi, SeriesApi } from '@/data/api'
+import { IMoviesApi, IPopcornTimeStatusApi } from '@/data/api'
 import PopcornMovieAdapter from '@/data/helpers/PopcornMovieAdapter'
 import { Movie } from '@/data/models/Movie'
 import { MovieRepository } from '@/data/repositories'
 import { PopcornApiStatus, IPopcornTimeApi } from '@/services'
 import { Slugger } from '@/utils'
+import { PopcornMovie } from '@/services/popcornTimeTypes'
 
 export enum CrawlerStatus {
   Idle = 'IDLE',
@@ -11,7 +12,8 @@ export enum CrawlerStatus {
 }
 
 export type ApiClientTypes = {
-  moviesApi: IPopcornTimeApi
+  statusApi: IPopcornTimeStatusApi
+  moviesApi: IMoviesApi
   seriesApi: IPopcornTimeApi
   animesApi: IPopcornTimeApi
 }
@@ -58,9 +60,9 @@ export class Crawler {
   }
 
   async crawlMovies(): Promise<void> {
-    const { moviesApi } = this.apiClients
+    const { statusApi, moviesApi } = this.apiClients
 
-    const currentApiStatus = await moviesApi.getStatus()
+    const currentApiStatus = await statusApi.getStatus()
 
     if (!currentApiStatus) throw new Error('Falhou no engano')
 
@@ -73,13 +75,13 @@ export class Crawler {
 
     this.lastApiStatus = currentApiStatus
 
-    // const pages = await moviesApi.getPages()
+    const pages = await moviesApi.getPages()
 
-    // const popcornMovies: PopcornMovie[] = []
-    // pages.forEach(async page => {
-    //   const foundMovies = await moviesApi.getByPage(page)
-    //   popcornMovies.push(...foundMovies)
-    // })
+    const popcornMovies: PopcornMovie[] = []
+    pages.forEach(async page => {
+      const foundMovies = await moviesApi.getByPage(page)
+      popcornMovies.push(...foundMovies)
+    })
 
     // const movies = this.popcornMovieAdapter.adaptMovies(popcornMovies)
     // const newMovies = this.filterNewMovies(movies)
