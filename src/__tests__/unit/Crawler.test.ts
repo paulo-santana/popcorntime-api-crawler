@@ -112,8 +112,16 @@ describe('Crawler', () => {
         await crawler.start()
         expect(saveMany).toBeCalled()
         expect(config.movieRepository.moviesPool).toHaveLength(
-          config.apiClients.moviesApi.movies.length
+          config.apiClients.moviesApi.popcornMovies.length
         )
+      })
+
+      it('should save only movies that are new to database', async () => {
+        const { crawler, config } = makeSut()
+        const newMovies = config.movieRepository.simulatePreviousCralAndReturnUnsavedMovies()
+        const saveMany = jest.spyOn(config.movieRepository, 'saveMany')
+        await crawler.start()
+        expect(saveMany).toBeCalledWith(newMovies)
       })
     })
   })
