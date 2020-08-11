@@ -83,7 +83,7 @@ export class Crawler {
       popcornMovies.push(...foundMovies)
     })
 
-    // const movies = this.popcornMovieAdapter.adaptMovies(popcornMovies)
+    const movies = this.popcornMovieAdapter.adaptMovies(popcornMovies)
     // const newMovies = this.filterNewMovies(movies)
     // const sluggedMovies = this.slugifyMovies(newMovies)
     // this.movieRepository.saveMany(sluggedMovies)
