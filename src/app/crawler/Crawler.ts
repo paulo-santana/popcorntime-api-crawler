@@ -86,13 +86,17 @@ export class Crawler {
     }
 
     const movies = this.popcornMovieAdapter.adaptMovies(popcornMovies)
-    const newMovies = this.filterNewMovies(movies)
+    const newMovies = await this.filterNewMovies(movies)
     const sluggedMovies = this.slugifyMovies(newMovies)
     this.movieRepository.saveMany(sluggedMovies)
   }
 
-  private filterNewMovies(movies: Movie[]): Movie[] {
-    return movies
+  private async filterNewMovies(movies: Movie[]): Movie[] {
+    const oldMovies: Movie[] = await this.movieRepository.getAll()
+    const newMovies = movies.filter(
+      x => !oldMovies.some(oldMovie => oldMovie._id === x._id)
+    )
+    return newMovies
   }
 
   slugifyMovies(movies: Movie[]): Movie[] {
