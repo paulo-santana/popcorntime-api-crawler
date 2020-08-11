@@ -1,18 +1,18 @@
-import { IPopcornTimeApi, PopcornApiStatus } from '@/services'
+import { PopcornApiStatus, IMoviesApi } from '@/services'
 import { PopcornMovie } from '@/services/popcornTimeTypes'
 import { apiStatusStub } from './mocks'
 import apiResources from './apiResources'
 
-export const pages = ['movies/1', 'movies/2', 'movies/3']
+export class MoviesApiStub implements IMoviesApi {
+  pages = ['movies/1', 'movies/2', 'movies/3']
 
-export class MoviesApiStub implements IPopcornTimeApi {
   getStatus(): Promise<PopcornApiStatus> {
     const statusStub: PopcornApiStatus = apiStatusStub
     return new Promise(resolve => resolve(statusStub))
   }
 
   getPages(): Promise<string[]> {
-    return new Promise(resolve => resolve(pages))
+    return new Promise(resolve => resolve(this.pages))
   }
 
   getByPage(
