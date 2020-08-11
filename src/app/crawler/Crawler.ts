@@ -91,7 +91,7 @@ export class Crawler {
     this.movieRepository.saveMany(sluggedMovies)
   }
 
-  private async filterNewMovies(movies: Movie[]): Movie[] {
+  private async filterNewMovies(movies: Movie[]): Promise<Movie[]> {
     const oldMovies: Movie[] = await this.movieRepository.getAll()
     const newMovies = movies.filter(
       x => !oldMovies.some(oldMovie => oldMovie._id === x._id)
