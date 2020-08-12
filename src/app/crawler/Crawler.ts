@@ -1,10 +1,10 @@
-import { IMoviesApi, IPopcornTimeStatusApi } from '@/data/api'
+import { IMoviesApi, ISeriesApi, IPopcornTimeStatusApi } from '@/data/api'
 import PopcornMovieAdapter from '@/data/helpers/PopcornMovieAdapter'
 import { Movie } from '@/data/models/Movie'
 import { IMovieRepository } from '@/data/repositories'
 import { PopcornApiStatus, IPopcornTimeApi } from '@/services'
 import { ISlugger } from '@/utils'
-import { PopcornMovie } from '@/services/popcornTimeTypes'
+import { PopcornMovie, PopcornShow } from '@/services/popcornTimeTypes'
 
 export enum CrawlerEvents {
   Stop = 'stop',
@@ -22,7 +22,7 @@ export enum CrawlerStatus {
 export type ApiClientTypes = {
   statusApi: IPopcornTimeStatusApi
   moviesApi: IMoviesApi
-  seriesApi: IPopcornTimeApi
+  seriesApi: ISeriesApi
   animesApi: IPopcornTimeApi
 }
 
@@ -90,6 +90,7 @@ export class Crawler {
 
   async crawl(): Promise<void> {
     await this.crawlMovies()
+    await this.crawlSeries()
   }
 
   subscribe(
@@ -144,5 +145,18 @@ export class Crawler {
       return sluggedMovie
     })
     return sluggedMovies
+  }
+
+  async crawlSeries(): Promise<void> {
+    const { seriesApi } = this.apiClients
+    const pages = await seriesApi.getPages()
+
+    const popcornShows: PopcornShow[] = []
+    for (let i = 0; i < pages.length; i++) {
+      const page = pages[i]
+      // eslint-disable-next-line no-await-in-loop
+      const foundShows = await seriesApi.getByPage(page)
+      popcornShows.push(...foundShows)
+    }
   }
 }
