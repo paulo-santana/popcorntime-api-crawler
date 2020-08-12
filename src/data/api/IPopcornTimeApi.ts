@@ -30,7 +30,7 @@ export interface ISeriesApi extends IPopcornTimeApi {
   getById(id: string): Promise<PopcornShow>
 }
 
-export interface ISanimesApi extends IPopcornTimeApi {
+export interface IAnimesApi extends IPopcornTimeApi {
   getByPage(page: string): Promise<Array<PopcornAnime>>
   getById(id: string): Promise<PopcornAnime>
 }

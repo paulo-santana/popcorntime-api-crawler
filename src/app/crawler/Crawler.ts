@@ -5,10 +5,15 @@ import { Movie } from '@/data/models/Movie'
 import { IMovieRepository } from '@/data/repositories'
 import { PopcornApiStatus, IPopcornTimeApi } from '@/services'
 import { ISlugger } from '@/utils'
-import { PopcornMovie, PopcornShow } from '@/services/popcornTimeTypes'
+import {
+  PopcornMovie,
+  PopcornShow,
+  PopcornAnime,
+} from '@/services/popcornTimeTypes'
 import PopcornSerieAdapter from '@/data/helpers/PopcornSerieAdapter'
 import { ISeriesRepository } from '@/data/repositories/ISeriesRepository'
 import { Serie } from '@/data/models/Serie'
+import PopcornAnimeAdapter from '@/data/helpers/PopcornAnimeAdapter'
 
 export enum CrawlerEvents {
   Stop = 'stop',
@@ -27,12 +32,13 @@ export type ApiClientTypes = {
   statusApi: IPopcornTimeStatusApi
   moviesApi: IMoviesApi
   seriesApi: ISeriesApi
-  animesApi: IPopcornTimeApi
+  animesApi: IAnimesApi
 }
 
 export type AdapterTypes = {
   popcornMovieAdapter: PopcornMovieAdapter
   popcornSerieAdapter: PopcornSerieAdapter
+  popcornAnimeAdapter: PopcornAnimeAdapter
 }
 export type RepositoryTypes = {
   movieRepository: IMovieRepository
@@ -190,10 +196,14 @@ export class Crawler {
     const { animesApi } = this.apiClients
     const pages = await animesApi.getPages()
 
+    const popcornAnimes: PopcornAnime[] = []
     for (let i = 0; i < pages.length; i++) {
       const page = pages[i]
 
       const foundAnimes = await animesApi.getByPage(page)
+      popcornAnimes.push(...foundAnimes)
     }
+
+    const animes = this.adapters.popcornAnimeAdapter.adaptAnimes(popcornAnimes)
   }
 }
