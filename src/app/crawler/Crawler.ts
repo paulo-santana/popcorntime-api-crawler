@@ -7,6 +7,10 @@ import { ISlugger } from '@/utils'
 import { PopcornMovie } from '@/services/popcornTimeTypes'
 
 export enum CrawlerEvents {
+  Stop = 'stop',
+}
+
+export enum CrawlerEventReasons {
   ApiNotIdle,
 }
 
@@ -31,7 +35,7 @@ export type CrawlerConfig = {
 
 export type Observer = {
   event: CrawlerEvents
-  observerFunction: () => void
+  observerFunction: (reason: CrawlerEventReasons) => void
 }
 
 export class Crawler {
@@ -64,7 +68,7 @@ export class Crawler {
     if (!currentApiStatus) throw new Error('Falhou no engano')
 
     if (currentApiStatus.status !== 'Idle') {
-      this.notifyFor(CrawlerEvents.ApiNotIdle)
+      this.notifyFor(CrawlerEvents.Stop, CrawlerEventReasons.ApiNotIdle)
       this.stop()
       return
     }
@@ -88,17 +92,20 @@ export class Crawler {
     await this.crawlMovies()
   }
 
-  subscribe(event: CrawlerEvents, observerFunction: () => void): void {
+  subscribe(
+    event: CrawlerEvents,
+    observerFunction: (reason: CrawlerEventReasons) => void
+  ): void {
     this.observers.push({
       event,
       observerFunction,
     })
   }
 
-  private notifyFor(event: CrawlerEvents): void {
+  private notifyFor(event: CrawlerEvents, reason: CrawlerEventReasons): void {
     this.observers.forEach(observer => {
       if (observer.event === event) {
-        observer.observerFunction()
+        observer.observerFunction(reason)
       }
     })
   }
