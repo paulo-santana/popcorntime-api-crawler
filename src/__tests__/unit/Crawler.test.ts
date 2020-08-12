@@ -8,6 +8,7 @@ import {
 import { Slugger } from '@/utils'
 import PopcornMovieAdapter from '@/data/helpers/PopcornMovieAdapter'
 import PopcornSerieAdapter from '@/data/helpers/PopcornSerieAdapter'
+import PopcornAnimeAdapter from '@/data/helpers/PopcornAnimeAdapter'
 import { MoviesApiStub } from '../helpers/mocks/MoviesApiStub'
 import { SeriesApiStub } from '../helpers/mocks/SeriesApiStub'
 import { AnimesApiStub } from '../helpers/mocks/AnimesApiStub'
@@ -30,8 +31,13 @@ const makeSut = () => {
 
   const popcornMovieAdapter = new PopcornMovieAdapter()
   const popcornSerieAdapter = new PopcornSerieAdapter()
+  const popcornAnimeAdapter = new PopcornAnimeAdapter()
 
-  const adapters = { popcornMovieAdapter, popcornSerieAdapter }
+  const adapters = {
+    popcornMovieAdapter,
+    popcornSerieAdapter,
+    popcornAnimeAdapter,
+  }
 
   const crawlerConfig = {
     apiClients,
@@ -234,6 +240,16 @@ describe('Crawler', () => {
         expect(getByPage).toBeCalledTimes(
           config.apiClients.animesApi.pages.length
         )
+      })
+
+      it('should adapt all series from PopcornShow to Serie model', async () => {
+        const { crawler, config } = makeSut()
+        const adaptAnimes = jest.spyOn(
+          config.adapters.popcornAnimeAdapter,
+          'adaptAnimes'
+        )
+        await crawler.start()
+        expect(adaptAnimes).toBeCalled()
       })
     })
   })
