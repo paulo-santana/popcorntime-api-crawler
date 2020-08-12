@@ -103,6 +103,7 @@ export class Crawler {
   async crawl(): Promise<void> {
     await this.crawlMovies()
     await this.crawlSeries()
+    await this.crawlAnimes()
   }
 
   subscribe(
@@ -182,5 +183,10 @@ export class Crawler {
       x => !oldSeries.some(oldSerie => oldSerie._id === x._id)
     )
     return newSeries
+  }
+
+  async crawlAnimes(): Promise<void> {
+    const { animesApi } = this.apiClients
+    await animesApi.getPages()
   }
 }
