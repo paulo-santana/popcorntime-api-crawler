@@ -88,8 +88,7 @@ describe('Crawler', () => {
       const { crawler, config } = makeSut()
       const stopEvent = CrawlerEvents.Stop
       const { ApiNotIdle } = CrawlerEventReasons
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
-      const subscriber = jest.fn(reason => {})
+      const subscriber = jest.fn()
       crawler.subscribe(stopEvent, subscriber)
       expect(subscriber).not.toBeCalled()
 
@@ -151,6 +150,24 @@ describe('Crawler', () => {
         const saveMany = jest.spyOn(config.movieRepository, 'saveMany')
         await crawler.start()
         expect(saveMany).toBeCalledWith(newMovies)
+      })
+    })
+
+    describe('series', () => {
+      it('should get pages from SeriesApi', async () => {
+        const { crawler, config } = makeSut()
+        const getPages = jest.spyOn(config.apiClients.seriesApi, 'getPages')
+        await crawler.start()
+        expect(getPages).toBeCalled()
+      })
+
+      it('should get series for each page', async () => {
+        const { crawler, config } = makeSut()
+        const getByPage = jest.spyOn(config.apiClients.seriesApi, 'getByPage')
+        await crawler.start()
+        expect(getByPage).toBeCalledTimes(
+          config.apiClients.seriesApi.pages.length
+        )
       })
     })
   })
