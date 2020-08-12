@@ -226,6 +226,15 @@ describe('Crawler', () => {
         await crawler.start()
         expect(getPages).toBeCalled()
       })
+
+      it('should get animes for each page', async () => {
+        const { crawler, config } = makeSut()
+        const getByPage = jest.spyOn(config.apiClients.animesApi, 'getByPage')
+        await crawler.start()
+        expect(getByPage).toBeCalledTimes(
+          config.apiClients.animesApi.pages.length
+        )
+      })
     })
   })
 })
