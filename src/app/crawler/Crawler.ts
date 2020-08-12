@@ -6,6 +6,10 @@ import { PopcornApiStatus, IPopcornTimeApi } from '@/services'
 import { ISlugger } from '@/utils'
 import { PopcornMovie } from '@/services/popcornTimeTypes'
 
+export enum CrawlerEvents {
+  ApiNotIdle,
+}
+
 export enum CrawlerStatus {
   Idle = 'IDLE',
   Crawling = 'CRAWLING',
@@ -25,8 +29,13 @@ export type CrawlerConfig = {
   popcornMovieAdapter: PopcornMovieAdapter
 }
 
+export type Observer = {
+  event: CrawlerEvents
+  observerFunction: () => void
+}
+
 export class Crawler {
-  observers: Array<() => void> = []
+  observers: Array<Observer> = []
   private _status: CrawlerStatus = CrawlerStatus.Idle
   private lastApiStatus?: PopcornApiStatus
 
@@ -55,7 +64,7 @@ export class Crawler {
     if (!currentApiStatus) throw new Error('Falhou no engano')
 
     if (currentApiStatus.status !== 'Idle') {
-      this.notifyAll()
+      this.notifyFor(CrawlerEvents.ApiNotIdle)
       this.stop()
       return
     }
@@ -79,12 +88,19 @@ export class Crawler {
     await this.crawlMovies()
   }
 
-  subscribe(observerFunction: () => void): void {
-    this.observers.push(observerFunction)
+  subscribe(event: CrawlerEvents, observerFunction: () => void): void {
+    this.observers.push({
+      event,
+      observerFunction,
+    })
   }
 
-  private notifyAll(): void {
-    this.observers.forEach(observerFunction => observerFunction())
+  private notifyFor(event: CrawlerEvents): void {
+    this.observers.forEach(observer => {
+      if (observer.event === event) {
+        observer.observerFunction()
+      }
+    })
   }
 
   async crawlMovies(): Promise<void> {
