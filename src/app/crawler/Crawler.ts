@@ -26,6 +26,7 @@ export type CrawlerConfig = {
 }
 
 export class Crawler {
+  observers: Array<() => void> = []
   private _status: CrawlerStatus = CrawlerStatus.Idle
   private lastApiStatus?: PopcornApiStatus
 
@@ -54,6 +55,7 @@ export class Crawler {
     if (!currentApiStatus) throw new Error('Falhou no engano')
 
     if (currentApiStatus.status !== 'Idle') {
+      this.notifyAll()
       this.stop()
       return
     }
@@ -75,6 +77,14 @@ export class Crawler {
 
   async crawl(): Promise<void> {
     await this.crawlMovies()
+  }
+
+  subscribe(observerFunction: () => void): void {
+    this.observers.push(observerFunction)
+  }
+
+  private notifyAll(): void {
+    this.observers.forEach(observerFunction => observerFunction())
   }
 
   async crawlMovies(): Promise<void> {
