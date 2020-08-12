@@ -218,5 +218,14 @@ describe('Crawler', () => {
         expect(saveMany).toBeCalledWith(newMovies)
       })
     })
+
+    describe('animes', () => {
+      it('should get pages from AnimesApi', async () => {
+        const { crawler, config } = makeSut()
+        const getPages = jest.spyOn(config.apiClients.animesApi, 'getPages')
+        await crawler.start()
+        expect(getPages).toBeCalled()
+      })
+    })
   })
 })
