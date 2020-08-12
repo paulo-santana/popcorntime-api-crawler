@@ -13,6 +13,7 @@ import { SeriesApiStub } from '../helpers/mocks/SeriesApiStub'
 import { AnimesApiStub } from '../helpers/mocks/AnimesApiStub'
 import { StatusApiStub } from '../helpers/mocks/StatusApiStub'
 import { MovieRepositoryStub } from '../helpers/mocks/data/MovieRepositoryStub'
+import { SeriesRepositoryStub } from '../helpers/mocks/data/SeriesRepositoryStub'
 
 const makeSut = () => {
   const moviesApi = new MoviesApiStub()
@@ -24,14 +25,18 @@ const makeSut = () => {
 
   const slugger = new Slugger()
   const movieRepository = new MovieRepositoryStub()
+  const seriesRepository = new SeriesRepositoryStub()
+  const repositories = { movieRepository, seriesRepository }
+
   const popcornMovieAdapter = new PopcornMovieAdapter()
   const popcornSerieAdapter = new PopcornSerieAdapter()
 
   const adapters = { popcornMovieAdapter, popcornSerieAdapter }
+
   const crawlerConfig = {
     apiClients,
     slugger,
-    movieRepository,
+    repositories,
     adapters,
   }
 
@@ -139,18 +144,24 @@ describe('Crawler', () => {
 
       it('should save adapted, new movies into the repository', async () => {
         const { crawler, config } = makeSut()
-        const saveMany = jest.spyOn(config.movieRepository, 'saveMany')
+        const saveMany = jest.spyOn(
+          config.repositories.movieRepository,
+          'saveMany'
+        )
         await crawler.start()
         expect(saveMany).toBeCalled()
-        expect(config.movieRepository.moviesPool).toHaveLength(
+        expect(config.repositories.movieRepository.moviesPool).toHaveLength(
           config.apiClients.moviesApi.popcornMovies.length
         )
       })
 
       it('should save only movies that are new to database', async () => {
         const { crawler, config } = makeSut()
-        const newMovies = config.movieRepository.simulatePreviousCralAndReturnUnsavedMovies()
-        const saveMany = jest.spyOn(config.movieRepository, 'saveMany')
+        const newMovies = config.repositories.movieRepository.simulatePreviousCralAndReturnUnsavedMovies()
+        const saveMany = jest.spyOn(
+          config.repositories.movieRepository,
+          'saveMany'
+        )
         await crawler.start()
         expect(saveMany).toBeCalledWith(newMovies)
       })
@@ -181,6 +192,19 @@ describe('Crawler', () => {
         )
         await crawler.start()
         expect(adaptMovies).toBeCalled()
+      })
+
+      it('should save adapted, new series into the repository', async () => {
+        const { crawler, config } = makeSut()
+        const saveMany = jest.spyOn(
+          config.repositories.seriesRepository,
+          'saveMany'
+        )
+        await crawler.start()
+        expect(saveMany).toBeCalled()
+        expect(config.repositories.seriesRepository.seriesPool).toHaveLength(
+          config.apiClients.seriesApi.popcornShows.length
+        )
       })
     })
   })
