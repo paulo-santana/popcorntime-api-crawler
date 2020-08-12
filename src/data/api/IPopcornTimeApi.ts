@@ -1,4 +1,8 @@
-import { PopcornMovie, PopcornShow } from '@/services/popcornTimeTypes'
+import {
+  PopcornMovie,
+  PopcornShow,
+  PopcornAnime,
+} from '@/services/popcornTimeTypes'
 
 export type PopcornApiStatus = {
   server: string
@@ -24,4 +28,9 @@ export interface IMoviesApi extends IPopcornTimeApi {
 export interface ISeriesApi extends IPopcornTimeApi {
   getByPage(page: string): Promise<Array<PopcornShow>>
   getById(id: string): Promise<PopcornShow>
+}
+
+export interface ISanimesApi extends IPopcornTimeApi {
+  getByPage(page: string): Promise<Array<PopcornAnime>>
+  getById(id: string): Promise<PopcornAnime>
 }

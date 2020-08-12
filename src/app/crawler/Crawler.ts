@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 import { IMoviesApi, ISeriesApi, IPopcornTimeStatusApi } from '@/data/api'
 import PopcornMovieAdapter from '@/data/helpers/PopcornMovieAdapter'
 import { Movie } from '@/data/models/Movie'
@@ -187,6 +188,12 @@ export class Crawler {
 
   async crawlAnimes(): Promise<void> {
     const { animesApi } = this.apiClients
-    await animesApi.getPages()
+    const pages = await animesApi.getPages()
+
+    for (let i = 0; i < pages.length; i++) {
+      const page = pages[i]
+
+      const foundAnimes = await animesApi.getByPage(page)
+    }
   }
 }
