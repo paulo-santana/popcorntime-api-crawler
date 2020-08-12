@@ -5,8 +5,8 @@ import {
 } from '@/services/popcornTimeTypes'
 
 export const moviesPages = ['movies/1', 'movies/2', 'movies/3'] as const
-export const animesPages = ['animes/1', 'animes/2']
-export const showsPages = ['shows/1', 'shows/2']
+export const animesPages = ['animes/1', 'animes/2'] as const
+export const showsPages = ['shows/1', 'shows/2'] as const
 
 export const apiResources: ApiResources = {
   movies: {

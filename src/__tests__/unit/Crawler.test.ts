@@ -206,6 +206,17 @@ describe('Crawler', () => {
           config.apiClients.seriesApi.popcornShows.length
         )
       })
+
+      it('should save only series that are new to database', async () => {
+        const { crawler, config } = makeSut()
+        const newMovies = config.repositories.seriesRepository.simulatePreviousCralAndReturnUnsavedSeries()
+        const saveMany = jest.spyOn(
+          config.repositories.seriesRepository,
+          'saveMany'
+        )
+        await crawler.start()
+        expect(saveMany).toBeCalledWith(newMovies)
+      })
     })
   })
 })
