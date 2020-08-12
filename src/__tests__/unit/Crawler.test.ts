@@ -1,4 +1,9 @@
-import { Crawler, CrawlerStatus } from '@/app/crawler'
+import {
+  Crawler,
+  CrawlerStatus,
+  CrawlerEvents,
+  CrawlerEventReasons,
+} from '@/app/crawler'
 
 import { Slugger } from '@/utils'
 import PopcornMovieAdapter from '@/data/helpers/PopcornMovieAdapter'
@@ -79,15 +84,19 @@ describe('Crawler', () => {
   })
 
   describe('notifying', () => {
-    it('should notify observers if stoped due to API not being "Idle"', async () => {
+    it('should notify observers if stoped with Reason "APINotIdle"', async () => {
       const { crawler, config } = makeSut()
-      const subscriber = jest.fn()
-      crawler.subscribe(subscriber)
+      const stopEvent = CrawlerEvents.Stop
+      const { ApiNotIdle } = CrawlerEventReasons
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      const subscriber = jest.fn(reason => {})
+      crawler.subscribe(stopEvent, subscriber)
       expect(subscriber).not.toBeCalled()
 
       config.apiClients.statusApi.simulateNotIdle()
       await crawler.start()
       expect(subscriber).toBeCalledTimes(1)
+      expect(subscriber).toBeCalledWith(ApiNotIdle)
     })
   })
 
