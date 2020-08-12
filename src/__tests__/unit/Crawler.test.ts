@@ -78,6 +78,19 @@ describe('Crawler', () => {
     })
   })
 
+  describe('notifying', () => {
+    it('should notify observers if stoped due to API not being "Idle"', async () => {
+      const { crawler, config } = makeSut()
+      const subscriber = jest.fn()
+      crawler.subscribe(subscriber)
+      expect(subscriber).not.toBeCalled()
+
+      config.apiClients.statusApi.simulateNotIdle()
+      await crawler.start()
+      expect(subscriber).toBeCalledTimes(1)
+    })
+  })
+
   describe('crawling', () => {
     describe('movies', () => {
       it('should get pages from MoviesApi', async () => {
