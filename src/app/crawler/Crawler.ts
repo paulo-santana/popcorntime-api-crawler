@@ -5,6 +5,7 @@ import { IMovieRepository } from '@/data/repositories'
 import { PopcornApiStatus, IPopcornTimeApi } from '@/services'
 import { ISlugger } from '@/utils'
 import { PopcornMovie, PopcornShow } from '@/services/popcornTimeTypes'
+import PopcornSerieAdapter from '@/data/helpers/PopcornSerieAdapter'
 
 export enum CrawlerEvents {
   Stop = 'stop',
@@ -26,11 +27,16 @@ export type ApiClientTypes = {
   animesApi: IPopcornTimeApi
 }
 
+export type AdapterTypes = {
+  popcornMovieAdapter: PopcornMovieAdapter
+  popcornSerieAdapter: PopcornSerieAdapter
+}
+
 export type CrawlerConfig = {
   apiClients: ApiClientTypes
   slugger: ISlugger
   movieRepository: IMovieRepository
-  popcornMovieAdapter: PopcornMovieAdapter
+  adapters: AdapterTypes
 }
 
 export type Observer = {
@@ -46,7 +52,7 @@ export class Crawler {
   private apiClients: ApiClientTypes
   private slugger: ISlugger
   private movieRepository: IMovieRepository
-  private popcornMovieAdapter: PopcornMovieAdapter
+  private adapters: AdapterTypes
   lastUpdate = 0
 
   get status(): string {
@@ -57,7 +63,7 @@ export class Crawler {
     this.apiClients = config.apiClients
     this.slugger = config.slugger
     this.movieRepository = config.movieRepository
-    this.popcornMovieAdapter = config.popcornMovieAdapter
+    this.adapters = config.adapters
   }
 
   async start(): Promise<void> {
@@ -124,7 +130,7 @@ export class Crawler {
       popcornMovies.push(...foundMovies)
     }
 
-    const movies = this.popcornMovieAdapter.adaptMovies(popcornMovies)
+    const movies = this.adapters.popcornMovieAdapter.adaptMovies(popcornMovies)
     const newMovies = await this.filterNewMovies(movies)
     const sluggedMovies = this.slugifyMovies(newMovies)
     this.movieRepository.saveMany(sluggedMovies)
@@ -158,5 +164,6 @@ export class Crawler {
       const foundShows = await seriesApi.getByPage(page)
       popcornShows.push(...foundShows)
     }
+    this.adapters.popcornSerieAdapter.adaptSeries(popcornShows)
   }
 }
