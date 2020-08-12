@@ -40,9 +40,9 @@ describe('Crawler', () => {
       expect(crawler.status).toBe(CrawlerStatus.Idle)
     })
 
-    it('should have status "CRAWLING" after start() has been called', () => {
+    it('should have status "CRAWLING" after start() has been called', async () => {
       const { crawler } = makeSut()
-      crawler.start()
+      await crawler.start()
       expect(crawler.status).toBe(CrawlerStatus.Crawling)
     })
 
@@ -63,11 +63,18 @@ describe('Crawler', () => {
       expect(crawler.status).toBe(CrawlerStatus.Crawling)
     })
 
-    it('should getStatus from StatusApi client', () => {
+    it('should getStatus from StatusApi client', async () => {
       const { crawler, config } = makeSut()
       const getStatus = jest.spyOn(config.apiClients.statusApi, 'getStatus')
-      crawler.start()
+      await crawler.start()
       expect(getStatus).toHaveBeenCalled()
+    })
+
+    it('must not start crawling if API is not "Idle"', async () => {
+      const { crawler, config } = makeSut()
+      config.apiClients.statusApi.simulateNotIdle()
+      await crawler.start()
+      expect(crawler.status).not.toBe(CrawlerStatus.Crawling)
     })
   })
 

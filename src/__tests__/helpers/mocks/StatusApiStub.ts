@@ -13,4 +13,16 @@ export class StatusApiStub {
         updated: apiStatusStub.updated + 1,
       }))
   }
+
+  simulateNotIdle(): void {
+    jest.spyOn(StatusApiStub.prototype, 'getStatus').mockImplementationOnce(
+      () =>
+        new Promise(resolve =>
+          resolve({
+            ...apiStatusStub,
+            status: 'Scraping EZTV',
+          })
+        )
+    )
+  }
 }
