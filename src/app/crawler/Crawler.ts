@@ -6,6 +6,8 @@ import { PopcornApiStatus, IPopcornTimeApi } from '@/services'
 import { ISlugger } from '@/utils'
 import { PopcornMovie, PopcornShow } from '@/services/popcornTimeTypes'
 import PopcornSerieAdapter from '@/data/helpers/PopcornSerieAdapter'
+import { ISeriesRepository } from '@/data/repositories/ISeriesRepository'
+import { Serie } from '@/data/models/Serie'
 
 export enum CrawlerEvents {
   Stop = 'stop',
@@ -31,11 +33,15 @@ export type AdapterTypes = {
   popcornMovieAdapter: PopcornMovieAdapter
   popcornSerieAdapter: PopcornSerieAdapter
 }
+export type RepositoryTypes = {
+  movieRepository: IMovieRepository
+  seriesRepository: ISeriesRepository
+}
 
 export type CrawlerConfig = {
   apiClients: ApiClientTypes
   slugger: ISlugger
-  movieRepository: IMovieRepository
+  repositories: RepositoryTypes
   adapters: AdapterTypes
 }
 
@@ -51,7 +57,7 @@ export class Crawler {
 
   private apiClients: ApiClientTypes
   private slugger: ISlugger
-  private movieRepository: IMovieRepository
+  private repositories: RepositoryTypes
   private adapters: AdapterTypes
   lastUpdate = 0
 
@@ -62,7 +68,7 @@ export class Crawler {
   constructor(config: CrawlerConfig) {
     this.apiClients = config.apiClients
     this.slugger = config.slugger
-    this.movieRepository = config.movieRepository
+    this.repositories = config.repositories
     this.adapters = config.adapters
   }
 
@@ -133,11 +139,11 @@ export class Crawler {
     const movies = this.adapters.popcornMovieAdapter.adaptMovies(popcornMovies)
     const newMovies = await this.filterNewMovies(movies)
     const sluggedMovies = this.slugifyMovies(newMovies)
-    this.movieRepository.saveMany(sluggedMovies)
+    this.repositories.movieRepository.saveMany(sluggedMovies)
   }
 
   private async filterNewMovies(movies: Movie[]): Promise<Movie[]> {
-    const oldMovies: Movie[] = await this.movieRepository.getAll()
+    const oldMovies: Movie[] = await this.repositories.movieRepository.getAll()
     const newMovies = movies.filter(
       x => !oldMovies.some(oldMovie => oldMovie._id === x._id)
     )
@@ -164,6 +170,17 @@ export class Crawler {
       const foundShows = await seriesApi.getByPage(page)
       popcornShows.push(...foundShows)
     }
-    this.adapters.popcornSerieAdapter.adaptSeries(popcornShows)
+    const series = this.adapters.popcornSerieAdapter.adaptSeries(popcornShows)
+
+    const newSeries = await this.filterNewSeries(series)
+    this.repositories.seriesRepository.saveMany(newSeries)
+  }
+
+  private async filterNewSeries(series: Serie[]): Promise<Serie[]> {
+    const oldSeries: Serie[] = await this.repositories.seriesRepository.getAll()
+    const newSeries = series.filter(
+      x => !oldSeries.some(oldSerie => oldSerie._id === x._id)
+    )
+    return newSeries
   }
 }
