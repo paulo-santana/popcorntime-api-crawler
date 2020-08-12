@@ -48,6 +48,24 @@ export class Crawler {
 
   async start(): Promise<void> {
     this._status = CrawlerStatus.Crawling
+    const { statusApi } = this.apiClients
+    const currentApiStatus = await statusApi.getStatus()
+
+    if (!currentApiStatus) throw new Error('Falhou no engano')
+
+    if (currentApiStatus.status !== 'Idle') {
+      this.stop()
+      return
+    }
+
+    if (this.lastApiStatus) {
+      if (this.lastApiStatus?.updated >= currentApiStatus.updated) {
+        this.stop()
+        return
+      }
+    }
+
+    this.lastApiStatus = currentApiStatus
     await this.crawl()
   }
 
@@ -60,20 +78,7 @@ export class Crawler {
   }
 
   async crawlMovies(): Promise<void> {
-    const { statusApi, moviesApi } = this.apiClients
-
-    const currentApiStatus = await statusApi.getStatus()
-
-    if (!currentApiStatus) throw new Error('Falhou no engano')
-
-    if (this.lastApiStatus) {
-      if (this.lastApiStatus?.updated >= currentApiStatus.updated) {
-        this.stop()
-        return
-      }
-    }
-
-    this.lastApiStatus = currentApiStatus
+    const { moviesApi } = this.apiClients
 
     const pages = await moviesApi.getPages()
 
