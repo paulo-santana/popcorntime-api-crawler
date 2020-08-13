@@ -2,7 +2,7 @@
 import { IMoviesApi, ISeriesApi, IPopcornTimeStatusApi } from '@/data/api'
 import PopcornMovieAdapter from '@/data/helpers/PopcornMovieAdapter'
 import { Movie } from '@/data/models/Movie'
-import { IMovieRepository } from '@/data/repositories'
+import { IMoviesRepository } from '@/data/repositories'
 import { PopcornApiStatus, IAnimesApi } from '@/services'
 import { ISlugger } from '@/utils'
 import {
@@ -43,7 +43,7 @@ export type AdapterTypes = {
   popcornAnimeAdapter: PopcornAnimeAdapter
 }
 export type RepositoryTypes = {
-  movieRepository: IMovieRepository
+  movieRepository: IMoviesRepository
   seriesRepository: ISeriesRepository
   animesRepository: IAnimesRepository
 }

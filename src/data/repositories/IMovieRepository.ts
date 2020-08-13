@@ -1,6 +1,6 @@
 import { Movie } from '../models/Movie'
 
-export interface IMovieRepository {
+export interface IMoviesRepository {
   getAll(): Promise<Movie[]>
   saveMany(movies: Movie[]): void
 }

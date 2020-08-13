@@ -1,4 +1,4 @@
-import { IMovieRepository } from '@/data/repositories/IMovieRepository'
+import { IMoviesRepository } from '@/data/repositories/IMovieRepository'
 import { Movie } from '@/data/models/Movie'
 import PopcornMovieAdapter from '@/data/helpers/PopcornMovieAdapter'
 import { Slugger } from '@/utils/Slugger'
@@ -6,7 +6,7 @@ import { apiResources, moviesPages } from '../apiResources'
 
 const { movies } = apiResources
 
-export class MovieRepositoryStub implements IMovieRepository {
+export class MoviesRepositoryStub implements IMoviesRepository {
   getAll(): Promise<Movie[]> {
     return new Promise(resolve => resolve(this.moviesPool))
   }
@@ -30,11 +30,8 @@ export class MovieRepositoryStub implements IMovieRepository {
         this.moviesPool.push(adaptedMovies[j])
       }
 
-      const movieToSend: Movie = {
-        ...adaptedMovies[0],
-        slug: slugger.slug(adaptedMovies[0].title),
-      }
-      moviesToSend.push(movieToSend)
+      adaptedMovies[0].slug = slugger.slug(adaptedMovies[0].title)
+      moviesToSend.push(adaptedMovies[0])
     }
 
     return moviesToSend

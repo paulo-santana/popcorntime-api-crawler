@@ -13,7 +13,7 @@ import { MoviesApiStub } from '../helpers/mocks/MoviesApiStub'
 import { SeriesApiStub } from '../helpers/mocks/SeriesApiStub'
 import { AnimesApiStub } from '../helpers/mocks/AnimesApiStub'
 import { StatusApiStub } from '../helpers/mocks/StatusApiStub'
-import { MovieRepositoryStub } from '../helpers/mocks/data/MovieRepositoryStub'
+import { MoviesRepositoryStub } from '../helpers/mocks/data/MoviesRepositoryStub'
 import { SeriesRepositoryStub } from '../helpers/mocks/data/SeriesRepositoryStub'
 import { AnimesRepositoryStub } from '../helpers/mocks/data/AnimesRepositoryStub'
 
@@ -26,7 +26,7 @@ const makeSut = () => {
   const apiClients = { statusApi, moviesApi, seriesApi, animesApi }
 
   const slugger = new Slugger()
-  const movieRepository = new MovieRepositoryStub()
+  const movieRepository = new MoviesRepositoryStub()
   const seriesRepository = new SeriesRepositoryStub()
   const animesRepository = new AnimesRepositoryStub()
   const repositories = {
