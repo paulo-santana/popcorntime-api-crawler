@@ -103,7 +103,7 @@ describe('Crawler', () => {
   })
 
   describe('notifying', () => {
-    it('should notify observers if stoped with Reason "APINotIdle"', async () => {
+    it('should notify observers if stoped with Reason "ApiNotIdle"', async () => {
       const { crawler, config } = makeSut()
       const stopEvent = CrawlerEvents.Stop
       const { ApiNotIdle } = CrawlerEventReasons
@@ -117,11 +117,11 @@ describe('Crawler', () => {
       expect(subscriber).toBeCalledWith(ApiNotIdle)
     })
 
-    it('should notify observers if stoped with Reason "APINotIdle"', async () => {
-      const { crawler, config } = makeSut()
+    it('should notify observers if stoped with Reason "ApiNotUpdated"', async () => {
+      const { crawler } = makeSut()
       const stopEvent = CrawlerEvents.Stop
       const { ApiNotUpdated } = CrawlerEventReasons
-      const subscriber = jest.fn((reason: CrawlerEventReasons) => {})
+      const subscriber = jest.fn()
       crawler.subscribe(stopEvent, subscriber)
 
       await crawler.start()
