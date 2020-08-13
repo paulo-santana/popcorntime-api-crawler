@@ -3,7 +3,7 @@ import { IMoviesApi, ISeriesApi, IPopcornTimeStatusApi } from '@/data/api'
 import PopcornMovieAdapter from '@/data/helpers/PopcornMovieAdapter'
 import { Movie } from '@/data/models/Movie'
 import { IMovieRepository } from '@/data/repositories'
-import { PopcornApiStatus, IPopcornTimeApi } from '@/services'
+import { PopcornApiStatus, IAnimesApi } from '@/services'
 import { ISlugger } from '@/utils'
 import {
   PopcornMovie,
@@ -14,6 +14,8 @@ import PopcornSerieAdapter from '@/data/helpers/PopcornSerieAdapter'
 import { ISeriesRepository } from '@/data/repositories/ISeriesRepository'
 import { Serie } from '@/data/models/Serie'
 import PopcornAnimeAdapter from '@/data/helpers/PopcornAnimeAdapter'
+import { Anime } from '@/data/models/Anime'
+import { IAnimesRepository } from '@/data/repositories/IAnimesRepository'
 
 export enum CrawlerEvents {
   Stop = 'stop',
@@ -43,6 +45,7 @@ export type AdapterTypes = {
 export type RepositoryTypes = {
   movieRepository: IMovieRepository
   seriesRepository: ISeriesRepository
+  animesRepository: IAnimesRepository
 }
 
 export type CrawlerConfig = {
@@ -174,12 +177,11 @@ export class Crawler {
     const popcornShows: PopcornShow[] = []
     for (let i = 0; i < pages.length; i++) {
       const page = pages[i]
-      // eslint-disable-next-line no-await-in-loop
       const foundShows = await seriesApi.getByPage(page)
       popcornShows.push(...foundShows)
     }
-    const series = this.adapters.popcornSerieAdapter.adaptSeries(popcornShows)
 
+    const series = this.adapters.popcornSerieAdapter.adaptSeries(popcornShows)
     const newSeries = await this.filterNewSeries(series)
     this.repositories.seriesRepository.saveMany(newSeries)
   }
@@ -199,11 +201,20 @@ export class Crawler {
     const popcornAnimes: PopcornAnime[] = []
     for (let i = 0; i < pages.length; i++) {
       const page = pages[i]
-
       const foundAnimes = await animesApi.getByPage(page)
       popcornAnimes.push(...foundAnimes)
     }
 
     const animes = this.adapters.popcornAnimeAdapter.adaptAnimes(popcornAnimes)
+    const newAnimes = await this.filterNewAnimes(animes)
+    this.repositories.animesRepository.saveMany(newAnimes)
+  }
+
+  private async filterNewAnimes(animes: Anime[]): Promise<Anime[]> {
+    const oldAnimes: Anime[] = await this.repositories.animesRepository.getAll()
+    const newAnimes = animes.filter(
+      x => !oldAnimes.some(oldAnime => oldAnime._id === x._id)
+    )
+    return newAnimes
   }
 }
