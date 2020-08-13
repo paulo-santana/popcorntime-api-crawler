@@ -19,17 +19,14 @@ export class AnimesRepositoryStub implements IAnimesRepository {
     for (let i = 0; i < animesPages.length; i++) {
       const page = animesPages[i]
 
-      const adaptedAnime = adapter.adaptAnimes(animes[page])
+      const adaptedAnimes = adapter.adaptAnimes(animes[page])
 
       // by starting at 1, we don't save index 0 and send it as return value
-      for (let j = 1; j < adaptedAnime.length; j++) {
-        this.animesPool.push(adaptedAnime[j])
+      for (let j = 1; j < adaptedAnimes.length; j++) {
+        this.animesPool.push(adaptedAnimes[j])
       }
 
-      const animeToSend: Anime = {
-        ...adaptedAnime[0],
-      }
-      animesToSend.push(animeToSend)
+      animesToSend.push(adaptedAnimes[0])
     }
 
     return animesToSend
