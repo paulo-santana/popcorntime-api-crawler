@@ -220,7 +220,7 @@ describe('Crawler', () => {
 
       it('should save only series that are new to database', async () => {
         const { crawler, config } = makeSut()
-        const newMovies = config.repositories.seriesRepository.simulatePreviousCralAndReturnUnsavedSeries()
+        const newMovies = config.repositories.seriesRepository.simulatePreviousCrawlAndReturnUnsavedSeries()
         const saveMany = jest.spyOn(
           config.repositories.seriesRepository,
           'saveMany'

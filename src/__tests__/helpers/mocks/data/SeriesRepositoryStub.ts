@@ -9,30 +9,27 @@ export class SeriesRepositoryStub implements ISeriesRepository {
   seriesPool: Serie[] = []
 
   /**
-   * saves movies for each page, letting only one unsaved by page
+   * saves series for each page, letting only one unsaved by page
    * returning them
-   * @returns Movie[] - The movies which were not saved
+   * @returns Serie[] - The series which were not saved
    */
-  simulatePreviousCralAndReturnUnsavedSeries(): Serie[] {
+  simulatePreviousCrawlAndReturnUnsavedSeries(): Serie[] {
     const adapter = new PopcornSerieAdapter()
-    const moviesToSend = []
+    const seriesToSend = []
     for (let i = 0; i < showsPages.length; i++) {
       const page = showsPages[i]
 
-      const adaptedMovies = adapter.adaptSeries(shows[page])
+      const adaptedSeries = adapter.adaptSeries(shows[page])
 
       // by starting at 1, we don't save index 0 and send it as return value
-      for (let j = 1; j < adaptedMovies.length; j++) {
-        this.seriesPool.push(adaptedMovies[j])
+      for (let j = 1; j < adaptedSeries.length; j++) {
+        this.seriesPool.push(adaptedSeries[j])
       }
 
-      const movieToSend: Serie = {
-        ...adaptedMovies[0],
-      }
-      moviesToSend.push(movieToSend)
+      seriesToSend.push(adaptedSeries[0])
     }
 
-    return moviesToSend
+    return seriesToSend
   }
 
   getAll(): Promise<Serie[]> {
