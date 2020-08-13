@@ -16,9 +16,13 @@ export const apiStatusStub = {
   updated: 1597029486,
 }
 
-export const moviesPages = ['movies/1', 'movies/2', 'movies/3'] as const
-export const animesPages = ['animes/1', 'animes/2'] as const
-export const showsPages = ['shows/1', 'shows/2'] as const
+export const moviesPages = ['movies/1', 'movies/2', 'movies/3']
+export const animesPages = ['animes/1', 'animes/2']
+export const showsPages = ['shows/1', 'shows/2']
+
+export const moviesPagesTypes = ['movies/1', 'movies/2', 'movies/3'] as const
+export const animesPagesTypes = ['animes/1', 'animes/2'] as const
+export const showsPagesTypes = ['shows/1', 'shows/2'] as const
 
 export const apiResources: ApiResources = {
   movies: {

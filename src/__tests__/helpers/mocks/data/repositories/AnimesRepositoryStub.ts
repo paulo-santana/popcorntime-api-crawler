@@ -1,7 +1,7 @@
 import { PopcornAnimesAdapter } from '@/data/adapters/PopcornAnimesAdapter'
 import { Anime } from '@/data/models/Anime'
 import { IAnimesRepository } from '@/data/repositories/IAnimesRepository'
-import { animesPages, apiResources } from '../../mocks'
+import { animesPagesTypes, apiResources } from '../../mocks'
 
 const { animes } = apiResources
 
@@ -16,8 +16,8 @@ export class AnimesRepositoryStub implements IAnimesRepository {
   simulatePreviousCrawlAndReturnUnsavedAnimes(): Anime[] {
     const adapter = new PopcornAnimesAdapter()
     const animesToSend = []
-    for (let i = 0; i < animesPages.length; i++) {
-      const page = animesPages[i]
+    for (let i = 0; i < animesPagesTypes.length; i++) {
+      const page = animesPagesTypes[i]
 
       const adaptedAnimes = adapter.adaptAnimes(animes[page])
 

@@ -1,8 +1,8 @@
 import { IHttpClient } from '@/services/HttpClient'
 import { PopcornShow } from '@/services/popcornTimeTypes'
-import { IPopcornTimeResourcesApi } from '.'
+import { ISeriesApi } from './IPopcornTimeResourcesApi'
 
-export class SeriesApi implements IPopcornTimeResourcesApi {
+export class SeriesApi implements ISeriesApi {
   private client: IHttpClient
 
   constructor(client: IHttpClient) {
@@ -19,11 +19,5 @@ export class SeriesApi implements IPopcornTimeResourcesApi {
     const response = await this.client.get(page)
     const responseArray = JSON.parse(response)
     return responseArray
-  }
-
-  async getById(id: string): Promise<PopcornShow> {
-    const response = await this.client.get(`show/${id}`)
-    const responseObject: PopcornShow = JSON.parse(response)
-    return responseObject
   }
 }

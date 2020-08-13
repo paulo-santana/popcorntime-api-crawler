@@ -1,9 +1,9 @@
 import { IHttpClient } from '@/services/HttpClient'
 import { PopcornAnime } from '@/services/popcornTimeTypes'
-import { IPopcornTimeResourcesApi } from '.'
+import { IAnimesApi } from './IPopcornTimeResourcesApi'
 
 // eslint-disable-next-line import/prefer-default-export
-export class AnimesApi implements IPopcornTimeResourcesApi {
+export class AnimesApi implements IAnimesApi {
   private client: IHttpClient
 
   constructor(client: IHttpClient) {
@@ -11,7 +11,7 @@ export class AnimesApi implements IPopcornTimeResourcesApi {
   }
 
   async getPages(): Promise<Array<string>> {
-    const response = await this.client.get('/animes')
+    const response = await this.client.get('animes')
     const pages = JSON.parse(response)
     return pages
   }

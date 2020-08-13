@@ -10,12 +10,7 @@ const makeSut = () => {
 
 describe('AnimesApiAccess', () => {
   it('should fetch and parse pages correctly', async () => {
-    const { animesApi, httpClient } = makeSut()
-    jest.spyOn(httpClient, 'get').mockImplementationOnce(() => {
-      return new Promise(resolve =>
-        resolve(JSON.stringify(['animes/1', 'animes/2']))
-      )
-    })
+    const { animesApi } = makeSut()
     const pages = await animesApi.getPages()
     expect(pages).toEqual(['animes/1', 'animes/2'])
   })

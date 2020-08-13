@@ -2,7 +2,7 @@ import { IMoviesRepository } from '@/data/repositories/IMovieRepository'
 import { Movie } from '@/data/models/Movie'
 import { PopcornMoviesAdapter } from '@/data/adapters/PopcornMoviesAdapter'
 import { Slugger } from '@/utils/Slugger'
-import { apiResources, moviesPages } from '../../mocks'
+import { apiResources, moviesPagesTypes } from '../../mocks'
 
 const { movies } = apiResources
 
@@ -19,8 +19,8 @@ export class MoviesRepositoryStub implements IMoviesRepository {
     const adapter = new PopcornMoviesAdapter()
     const slugger = new Slugger()
     const moviesToSend = []
-    for (let i = 0; i < moviesPages.length; i++) {
-      const page = moviesPages[i]
+    for (let i = 0; i < moviesPagesTypes.length; i++) {
+      const page = moviesPagesTypes[i]
 
       const adaptedMovies = adapter.adaptMovies(movies[page])
 
