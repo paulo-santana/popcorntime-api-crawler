@@ -157,24 +157,39 @@ export class Crawler {
     }
 
     const movies = this.adapters.popcornMoviesAdapter.adaptMovies(popcornMovies)
-    const newMovies = await this.filterNewMovies(movies)
-    const sluggedMovies = this.slugifyMovies(newMovies)
-    this.repositories.moviesRepository.saveMany(sluggedMovies)
+    const newSluggedMovies = await this.filterAndSlugNewMovies(movies)
+    this.repositories.moviesRepository.saveMany(newSluggedMovies)
   }
 
-  private async filterNewMovies(movies: Movie[]): Promise<Movie[]> {
+  private async filterAndSlugNewMovies(movies: Movie[]): Promise<Movie[]> {
     const oldMovies: Movie[] = await this.repositories.moviesRepository.getAll()
     const newMovies = movies.filter(
       x => !oldMovies.some(oldMovie => oldMovie._id === x._id)
     )
-    return newMovies
+    const oldMoviesSlugs = oldMovies.map(movie => movie.slug)
+    const newSluggedMovies = this.slugifyMovies(newMovies, oldMoviesSlugs)
+    return newSluggedMovies
   }
 
-  slugifyMovies(movies: Movie[]): Movie[] {
-    const sluggedMovies = movies.map(movie => {
+  async slugifyMovies(
+    movies: Movie[],
+    oldMoviesSlugs: string[]
+  ): Promise<Movie[]> {
+    const firstSluggedMovies = movies.map(movie => {
       const sluggedMovie: Movie = { ...movie }
       sluggedMovie.slug = this.slugger.slug(movie.title)
       return sluggedMovie
+    })
+
+    const sluggedMovies = firstSluggedMovies.map(movie => {
+      if (oldMoviesSlugs.includes(movie.slug)) {
+        const newSluggedMovie: Movie = {
+          ...movie,
+          slug: this.slugger.slugWithId(movie.title, movie._id),
+        }
+        return newSluggedMovie
+      }
+      return movie
     })
     return sluggedMovies
   }
