@@ -1,21 +1,26 @@
 /* eslint-disable no-await-in-loop */
-import { IMoviesApi, ISeriesApi, IPopcornTimeStatusApi } from '@/data/api'
+import { PopcornAnimesAdapter } from '@/data/adapters/PopcornAnimesAdapter'
 import { PopcornMoviesAdapter } from '@/data/adapters/PopcornMoviesAdapter'
-import { Movie } from '@/data/models/Movie'
-import { IMoviesRepository } from '@/data/repositories'
-import { PopcornApiStatus, IAnimesApi } from '@/services'
-import { ISlugger } from '@/utils'
+import { PopcornSeriesAdapter } from '@/data/adapters/PopcornSeriesAdapter'
 import {
+  IAnimesApi,
+  IMoviesApi,
+  IPopcornTimeStatusApi,
+  ISeriesApi,
+  PopcornApiStatus,
+} from '@/data/api'
+import { Anime } from '@/data/models/Anime'
+import { Movie } from '@/data/models/Movie'
+import { Series } from '@/data/models/Series'
+import { IMoviesRepository } from '@/data/repositories'
+import { IAnimesRepository } from '@/data/repositories/IAnimesRepository'
+import { ISeriesRepository } from '@/data/repositories/ISeriesRepository'
+import {
+  PopcornAnime,
   PopcornMovie,
   PopcornShow,
-  PopcornAnime,
 } from '@/services/popcornTimeTypes'
-import { PopcornSeriesAdapter } from '@/data/adapters/PopcornSeriesAdapter'
-import { ISeriesRepository } from '@/data/repositories/ISeriesRepository'
-import { Series } from '@/data/models/Series'
-import { PopcornAnimesAdapter } from '@/data/adapters/PopcornAnimesAdapter'
-import { Anime } from '@/data/models/Anime'
-import { IAnimesRepository } from '@/data/repositories/IAnimesRepository'
+import { ISlugger } from '@/utils'
 
 export enum CrawlerEvents {
   Stop = 'stop',
@@ -23,6 +28,7 @@ export enum CrawlerEvents {
 
 export enum CrawlerEventReasons {
   ApiNotIdle,
+  ApiNotUpdated,
 }
 
 export enum CrawlerStatus {
@@ -96,9 +102,9 @@ export class Crawler {
     }
 
     if (this.lastApiStatus) {
-      // TODO: notify observers about stopping because lack of update
       if (this.lastApiStatus?.updated >= currentApiStatus.updated) {
         this.stop()
+        this.notifyFor(CrawlerEvents.Stop, CrawlerEventReasons.ApiNotUpdated)
         return
       }
     }
