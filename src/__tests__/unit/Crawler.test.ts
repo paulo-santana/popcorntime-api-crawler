@@ -125,11 +125,22 @@ describe('Crawler', () => {
       crawler.subscribe(stopEvent, subscriber)
 
       await crawler.start()
-      expect(subscriber).not.toBeCalled()
+      expect(subscriber).not.toBeCalledWith(ApiNotUpdated)
 
       crawler.stop()
       await crawler.start()
       expect(subscriber).toBeCalledWith(ApiNotUpdated)
+    })
+
+    it('should notify observers when completed a crawl sucessfuly', async () => {
+      const { crawler } = makeSut()
+      const stopEvent = CrawlerEvents.Stop
+      const { CrawlingFinished } = CrawlerEventReasons
+
+      const subscriber = jest.fn()
+      crawler.subscribe(stopEvent, subscriber)
+      await crawler.start()
+      expect(subscriber).toBeCalledWith(CrawlingFinished)
     })
   })
 
