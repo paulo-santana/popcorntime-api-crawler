@@ -2,7 +2,7 @@ import { IMoviesRepository } from '@/data/repositories/IMovieRepository'
 import { Movie } from '@/data/models/Movie'
 import { PopcornMoviesAdapter } from '@/data/adapters/PopcornMoviesAdapter'
 import { Slugger } from '@/utils/Slugger'
-import { apiResources, moviesPages } from '../mocks'
+import { apiResources, moviesPages } from '../../mocks'
 
 const { movies } = apiResources
 

@@ -1,7 +1,7 @@
 import { PopcornAnimesAdapter } from '@/data/adapters/PopcornAnimesAdapter'
 import { Anime } from '@/data/models/Anime'
 import { IAnimesRepository } from '@/data/repositories/IAnimesRepository'
-import { animesPages, apiResources } from '../mocks'
+import { animesPages, apiResources } from '../../mocks'
 
 const { animes } = apiResources
 

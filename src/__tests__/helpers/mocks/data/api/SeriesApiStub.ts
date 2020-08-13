@@ -1,6 +1,6 @@
-import { IPopcornTimeResourcesApi } from '@/services'
+import { IPopcornTimeResourcesApi } from '@/data/api'
 import { PopcornShow } from '@/services/popcornTimeTypes'
-import { apiResources } from './mocks'
+import { apiResources } from '../../mocks'
 
 const { shows } = apiResources
 

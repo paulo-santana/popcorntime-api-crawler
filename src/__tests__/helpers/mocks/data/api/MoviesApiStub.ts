@@ -1,6 +1,6 @@
-import { PopcornApiStatus, IMoviesApi } from '@/services'
+import { PopcornApiStatus, IMoviesApi } from '@/data/api'
 import { PopcornMovie } from '@/services/popcornTimeTypes'
-import { apiStatusStub, apiResources } from './mocks'
+import { apiStatusStub, apiResources } from '../../mocks'
 
 const { movies } = apiResources
 

@@ -1,7 +1,7 @@
 import { ISeriesRepository } from '@/data/repositories/ISeriesRepository'
 import { Series } from '@/data/models/Series'
 import { PopcornSeriesAdapter } from '@/data/adapters/PopcornSeriesAdapter'
-import { apiResources, showsPages } from '../mocks'
+import { apiResources, showsPages } from '../../mocks'
 
 const { shows } = apiResources
 

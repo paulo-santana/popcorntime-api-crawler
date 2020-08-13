@@ -1,5 +1,5 @@
 import { PopcornApiStatus } from '@/data/api'
-import { apiStatusStub } from './mocks'
+import { apiStatusStub } from '../../mocks'
 
 export class StatusApiStub {
   getStatus(): Promise<PopcornApiStatus> {

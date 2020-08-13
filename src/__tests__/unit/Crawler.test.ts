@@ -10,13 +10,13 @@ import { PopcornMoviesAdapter } from '@/data/adapters/PopcornMoviesAdapter'
 import { PopcornSeriesAdapter } from '@/data/adapters/PopcornSeriesAdapter'
 import { PopcornAnimesAdapter } from '@/data/adapters/PopcornAnimesAdapter'
 
-import { MoviesApiStub } from '../helpers/mocks/MoviesApiStub'
-import { SeriesApiStub } from '../helpers/mocks/SeriesApiStub'
-import { AnimesApiStub } from '../helpers/mocks/AnimesApiStub'
-import { StatusApiStub } from '../helpers/mocks/StatusApiStub'
-import { MoviesRepositoryStub } from '../helpers/mocks/data/MoviesRepositoryStub'
-import { SeriesRepositoryStub } from '../helpers/mocks/data/SeriesRepositoryStub'
-import { AnimesRepositoryStub } from '../helpers/mocks/data/AnimesRepositoryStub'
+import { MoviesApiStub } from '../helpers/mocks/data/api/MoviesApiStub'
+import { SeriesApiStub } from '../helpers/mocks/data/api/SeriesApiStub'
+import { StatusApiStub } from '../helpers/mocks/data/api/StatusApiStub'
+import { AnimesApiStub } from '../helpers/mocks/data/api/AnimesApiStub'
+import { MoviesRepositoryStub } from '../helpers/mocks/data/repositories/MoviesRepositoryStub'
+import { SeriesRepositoryStub } from '../helpers/mocks/data/repositories/SeriesRepositoryStub'
+import { AnimesRepositoryStub } from '../helpers/mocks/data/repositories/AnimesRepositoryStub'
 
 const makeSut = () => {
   const moviesApi = new MoviesApiStub()
