@@ -1,20 +1,20 @@
 import { ISeriesRepository } from '@/data/repositories/ISeriesRepository'
-import { Serie } from '@/data/models/Serie'
-import PopcornSerieAdapter from '@/data/helpers/PopcornSerieAdapter'
-import { apiResources, showsPages } from '../apiResources'
+import { Series } from '@/data/models/Series'
+import { PopcornSeriesAdapter } from '@/data/adapters/PopcornSeriesAdapter'
+import { apiResources, showsPages } from '../mocks'
 
 const { shows } = apiResources
 
 export class SeriesRepositoryStub implements ISeriesRepository {
-  seriesPool: Serie[] = []
+  seriesPool: Series[] = []
 
   /**
    * saves series for each page, letting only one unsaved by page
    * returning them
    * @returns Serie[] - The series which were not saved
    */
-  simulatePreviousCrawlAndReturnUnsavedSeries(): Serie[] {
-    const adapter = new PopcornSerieAdapter()
+  simulatePreviousCrawlAndReturnUnsavedSeries(): Series[] {
+    const adapter = new PopcornSeriesAdapter()
     const seriesToSend = []
     for (let i = 0; i < showsPages.length; i++) {
       const page = showsPages[i]
@@ -32,11 +32,11 @@ export class SeriesRepositoryStub implements ISeriesRepository {
     return seriesToSend
   }
 
-  getAll(): Promise<Serie[]> {
+  getAll(): Promise<Series[]> {
     return new Promise(resolve => resolve(this.seriesPool))
   }
 
-  saveMany(series: Serie[]): void {
+  saveMany(series: Series[]): void {
     this.seriesPool.push(...series)
   }
 }

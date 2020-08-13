@@ -6,9 +6,9 @@ import {
 } from '@/app/crawler'
 
 import { Slugger } from '@/utils'
-import PopcornMovieAdapter from '@/data/helpers/PopcornMovieAdapter'
-import PopcornSerieAdapter from '@/data/helpers/PopcornSerieAdapter'
-import PopcornAnimeAdapter from '@/data/helpers/PopcornAnimeAdapter'
+import { PopcornMoviesAdapter } from '@/data/adapters/PopcornMoviesAdapter'
+import { PopcornSeriesAdapter } from '@/data/adapters/PopcornSeriesAdapter'
+import { PopcornAnimesAdapter } from '@/data/adapters/PopcornAnimesAdapter'
 import { MoviesApiStub } from '../helpers/mocks/MoviesApiStub'
 import { SeriesApiStub } from '../helpers/mocks/SeriesApiStub'
 import { AnimesApiStub } from '../helpers/mocks/AnimesApiStub'
@@ -26,22 +26,22 @@ const makeSut = () => {
   const apiClients = { statusApi, moviesApi, seriesApi, animesApi }
 
   const slugger = new Slugger()
-  const movieRepository = new MoviesRepositoryStub()
+  const moviesRepository = new MoviesRepositoryStub()
   const seriesRepository = new SeriesRepositoryStub()
   const animesRepository = new AnimesRepositoryStub()
   const repositories = {
-    movieRepository,
+    moviesRepository,
     seriesRepository,
     animesRepository,
   }
 
-  const popcornMovieAdapter = new PopcornMovieAdapter()
-  const popcornSerieAdapter = new PopcornSerieAdapter()
-  const popcornAnimeAdapter = new PopcornAnimeAdapter()
+  const popcornMoviesAdapter = new PopcornMoviesAdapter()
+  const popcornSeriesAdapter = new PopcornSeriesAdapter()
+  const popcornAnimesAdapter = new PopcornAnimesAdapter()
   const adapters = {
-    popcornMovieAdapter,
-    popcornSerieAdapter,
-    popcornAnimeAdapter,
+    popcornMoviesAdapter,
+    popcornSeriesAdapter,
+    popcornAnimesAdapter,
   }
 
   const crawlerConfig = {
@@ -139,7 +139,7 @@ describe('Crawler', () => {
       it('should adapt all movies from PopcornMovie to Movie model', async () => {
         const { crawler, config } = makeSut()
         const adaptSeries = jest.spyOn(
-          config.adapters.popcornSerieAdapter,
+          config.adapters.popcornSeriesAdapter,
           'adaptSeries'
         )
         await crawler.start()
@@ -156,21 +156,21 @@ describe('Crawler', () => {
       it('should save adapted, new movies into the repository', async () => {
         const { crawler, config } = makeSut()
         const saveMany = jest.spyOn(
-          config.repositories.movieRepository,
+          config.repositories.moviesRepository,
           'saveMany'
         )
         await crawler.start()
         expect(saveMany).toBeCalled()
-        expect(config.repositories.movieRepository.moviesPool).toHaveLength(
+        expect(config.repositories.moviesRepository.moviesPool).toHaveLength(
           config.apiClients.moviesApi.popcornMovies.length
         )
       })
 
       it('should save only movies that are new to database', async () => {
         const { crawler, config } = makeSut()
-        const newMovies = config.repositories.movieRepository.simulatePreviousCralAndReturnUnsavedMovies()
+        const newMovies = config.repositories.moviesRepository.simulatePreviousCrawlAndReturnUnsavedMovies()
         const saveMany = jest.spyOn(
-          config.repositories.movieRepository,
+          config.repositories.moviesRepository,
           'saveMany'
         )
         await crawler.start()
@@ -195,10 +195,10 @@ describe('Crawler', () => {
         )
       })
 
-      it('should adapt all series from PopcornShow to Serie model', async () => {
+      it('should adapt all series from PopcornShow to Series model', async () => {
         const { crawler, config } = makeSut()
         const adaptMovies = jest.spyOn(
-          config.adapters.popcornSerieAdapter,
+          config.adapters.popcornSeriesAdapter,
           'adaptSeries'
         )
         await crawler.start()
@@ -247,17 +247,17 @@ describe('Crawler', () => {
         )
       })
 
-      it('should adapt all series from PopcornShow to Serie model', async () => {
+      it('should adapt all animes from PopcornAnime to Animes model', async () => {
         const { crawler, config } = makeSut()
         const adaptAnimes = jest.spyOn(
-          config.adapters.popcornAnimeAdapter,
+          config.adapters.popcornAnimesAdapter,
           'adaptAnimes'
         )
         await crawler.start()
         expect(adaptAnimes).toBeCalled()
       })
 
-      it('should save adapted, new series into the repository', async () => {
+      it('should save adapted, new animes into the repository', async () => {
         const { crawler, config } = makeSut()
         const saveMany = jest.spyOn(
           config.repositories.animesRepository,

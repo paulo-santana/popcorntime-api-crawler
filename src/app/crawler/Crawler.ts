@@ -1,6 +1,6 @@
 /* eslint-disable no-await-in-loop */
 import { IMoviesApi, ISeriesApi, IPopcornTimeStatusApi } from '@/data/api'
-import PopcornMovieAdapter from '@/data/helpers/PopcornMovieAdapter'
+import { PopcornMoviesAdapter } from '@/data/adapters/PopcornMoviesAdapter'
 import { Movie } from '@/data/models/Movie'
 import { IMoviesRepository } from '@/data/repositories'
 import { PopcornApiStatus, IAnimesApi } from '@/services'
@@ -10,10 +10,10 @@ import {
   PopcornShow,
   PopcornAnime,
 } from '@/services/popcornTimeTypes'
-import PopcornSerieAdapter from '@/data/helpers/PopcornSerieAdapter'
+import { PopcornSeriesAdapter } from '@/data/adapters/PopcornSeriesAdapter'
 import { ISeriesRepository } from '@/data/repositories/ISeriesRepository'
-import { Serie } from '@/data/models/Serie'
-import PopcornAnimeAdapter from '@/data/helpers/PopcornAnimeAdapter'
+import { Series } from '@/data/models/Series'
+import { PopcornAnimesAdapter } from '@/data/adapters/PopcornAnimesAdapter'
 import { Anime } from '@/data/models/Anime'
 import { IAnimesRepository } from '@/data/repositories/IAnimesRepository'
 
@@ -38,14 +38,19 @@ export type ApiClientTypes = {
 }
 
 export type AdapterTypes = {
-  popcornMovieAdapter: PopcornMovieAdapter
-  popcornSerieAdapter: PopcornSerieAdapter
-  popcornAnimeAdapter: PopcornAnimeAdapter
+  popcornMoviesAdapter: PopcornMoviesAdapter
+  popcornSeriesAdapter: PopcornSeriesAdapter
+  popcornAnimesAdapter: PopcornAnimesAdapter
 }
 export type RepositoryTypes = {
-  movieRepository: IMoviesRepository
+  moviesRepository: IMoviesRepository
   seriesRepository: ISeriesRepository
   animesRepository: IAnimesRepository
+}
+
+export type Observer = {
+  event: CrawlerEvents
+  observerFunction: (reason: CrawlerEventReasons) => void
 }
 
 export type CrawlerConfig = {
@@ -53,11 +58,6 @@ export type CrawlerConfig = {
   slugger: ISlugger
   repositories: RepositoryTypes
   adapters: AdapterTypes
-}
-
-export type Observer = {
-  event: CrawlerEvents
-  observerFunction: (reason: CrawlerEventReasons) => void
 }
 
 export class Crawler {
@@ -96,6 +96,7 @@ export class Crawler {
     }
 
     if (this.lastApiStatus) {
+      // TODO: notify observers about stopping because lack of update
       if (this.lastApiStatus?.updated >= currentApiStatus.updated) {
         this.stop()
         return
@@ -147,14 +148,14 @@ export class Crawler {
       popcornMovies.push(...foundMovies)
     }
 
-    const movies = this.adapters.popcornMovieAdapter.adaptMovies(popcornMovies)
+    const movies = this.adapters.popcornMoviesAdapter.adaptMovies(popcornMovies)
     const newMovies = await this.filterNewMovies(movies)
     const sluggedMovies = this.slugifyMovies(newMovies)
-    this.repositories.movieRepository.saveMany(sluggedMovies)
+    this.repositories.moviesRepository.saveMany(sluggedMovies)
   }
 
   private async filterNewMovies(movies: Movie[]): Promise<Movie[]> {
-    const oldMovies: Movie[] = await this.repositories.movieRepository.getAll()
+    const oldMovies: Movie[] = await this.repositories.moviesRepository.getAll()
     const newMovies = movies.filter(
       x => !oldMovies.some(oldMovie => oldMovie._id === x._id)
     )
@@ -181,15 +182,15 @@ export class Crawler {
       popcornShows.push(...foundShows)
     }
 
-    const series = this.adapters.popcornSerieAdapter.adaptSeries(popcornShows)
+    const series = this.adapters.popcornSeriesAdapter.adaptSeries(popcornShows)
     const newSeries = await this.filterNewSeries(series)
     this.repositories.seriesRepository.saveMany(newSeries)
   }
 
-  private async filterNewSeries(series: Serie[]): Promise<Serie[]> {
-    const oldSeries: Serie[] = await this.repositories.seriesRepository.getAll()
+  private async filterNewSeries(series: Series[]): Promise<Series[]> {
+    const allOldSeries: Series[] = await this.repositories.seriesRepository.getAll()
     const newSeries = series.filter(
-      x => !oldSeries.some(oldSerie => oldSerie._id === x._id)
+      x => !allOldSeries.some(oldSeries => oldSeries._id === x._id)
     )
     return newSeries
   }
@@ -205,7 +206,7 @@ export class Crawler {
       popcornAnimes.push(...foundAnimes)
     }
 
-    const animes = this.adapters.popcornAnimeAdapter.adaptAnimes(popcornAnimes)
+    const animes = this.adapters.popcornAnimesAdapter.adaptAnimes(popcornAnimes)
     const newAnimes = await this.filterNewAnimes(animes)
     this.repositories.animesRepository.saveMany(newAnimes)
   }

@@ -1,19 +1,12 @@
-import { IPopcornTimeApi, PopcornApiStatus } from '@/services'
 import { IHttpClient } from '@/services/HttpClient'
 import { PopcornMovie } from '@/services/popcornTimeTypes'
+import { IPopcornTimeResourcesApi } from '.'
 
-// eslint-disable-next-line import/prefer-default-export
-export class MoviesApi implements IPopcornTimeApi {
+export class MoviesApi implements IPopcornTimeResourcesApi {
   private client: IHttpClient
 
   constructor(client: IHttpClient) {
     this.client = client
-  }
-
-  async getStatus(): Promise<PopcornApiStatus> {
-    const response = await this.client.get('/status')
-    const status: PopcornApiStatus = JSON.parse(response)
-    return status
   }
 
   async getPages(): Promise<Array<string>> {

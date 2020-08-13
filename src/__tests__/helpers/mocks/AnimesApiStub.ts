@@ -1,10 +1,10 @@
-import { IPopcornTimeApi } from '@/services'
+import { IPopcornTimeResourcesApi } from '@/services'
 import { PopcornAnime } from '@/services/popcornTimeTypes'
-import { apiResources } from './apiResources'
+import { apiResources } from './mocks'
 
 const { animes } = apiResources
 
-export class AnimesApiStub implements IPopcornTimeApi {
+export class AnimesApiStub implements IPopcornTimeResourcesApi {
   pages = ['animes/1', 'animes/2']
   popcornAnimes: PopcornAnime[] = new Array<PopcornAnime>().concat(
     ...animes['animes/1'],

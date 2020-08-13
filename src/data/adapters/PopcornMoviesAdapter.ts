@@ -1,14 +1,13 @@
 import { PopcornMovie } from '@/services/popcornTimeTypes'
 import { Movie } from '../models/Movie'
 
-export default class PopcornMovieAdapter {
+export class PopcornMoviesAdapter {
   adaptMovies(popcornMovies: PopcornMovie[]): Movie[] {
     const movies = popcornMovies.map(popcornMovie => {
-      const movie: Movie = {
+      return {
         _id: popcornMovie._id,
         title: popcornMovie.title,
       }
-      return movie
     })
     return movies
   }

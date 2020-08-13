@@ -1,15 +1,14 @@
 import { PopcornShow } from '@/services/popcornTimeTypes'
-import { Serie } from '../models/Serie'
+import { Series } from '../models/Series'
 
-export default class PopcornSerieAdapter {
-  adaptSeries(popcornShows: PopcornShow[]): Serie[] {
+export class PopcornSeriesAdapter {
+  adaptSeries(popcornShows: PopcornShow[]): Series[] {
     const series = popcornShows.map(popcornShow => {
-      const serie: Serie = {
+      return {
         _id: popcornShow._id,
         title: popcornShow.title,
         slug: popcornShow.slug,
       }
-      return serie
     })
     return series
   }

@@ -1,8 +1,8 @@
 import { IMoviesRepository } from '@/data/repositories/IMovieRepository'
 import { Movie } from '@/data/models/Movie'
-import PopcornMovieAdapter from '@/data/helpers/PopcornMovieAdapter'
+import { PopcornMoviesAdapter } from '@/data/adapters/PopcornMoviesAdapter'
 import { Slugger } from '@/utils/Slugger'
-import { apiResources, moviesPages } from '../apiResources'
+import { apiResources, moviesPages } from '../mocks'
 
 const { movies } = apiResources
 
@@ -15,8 +15,8 @@ export class MoviesRepositoryStub implements IMoviesRepository {
    * returning them
    * @returns Movie[] - The movies which were not saved
    */
-  simulatePreviousCralAndReturnUnsavedMovies(): Movie[] {
-    const adapter = new PopcornMovieAdapter()
+  simulatePreviousCrawlAndReturnUnsavedMovies(): Movie[] {
+    const adapter = new PopcornMoviesAdapter()
     const slugger = new Slugger()
     const moviesToSend = []
     for (let i = 0; i < moviesPages.length; i++) {

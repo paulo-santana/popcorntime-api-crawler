@@ -1,7 +1,6 @@
 import Axios, { AxiosInstance } from 'axios'
 import { IHttpClient } from './IHttpClient'
 
-// eslint-disable-next-line import/prefer-default-export
 export class AxiosHttpClient implements IHttpClient {
   axios: AxiosInstance
 

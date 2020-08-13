@@ -16,21 +16,21 @@ export type PopcornApiStatus = {
   commit: string
 }
 
-export interface IPopcornTimeApi {
+export interface IPopcornTimeResourcesApi {
   getPages(): Promise<Array<string>>
 }
 
-export interface IMoviesApi extends IPopcornTimeApi {
+export interface IMoviesApi extends IPopcornTimeResourcesApi {
   getByPage(page: string): Promise<Array<PopcornMovie>>
   getById(id: string): Promise<PopcornMovie>
 }
 
-export interface ISeriesApi extends IPopcornTimeApi {
+export interface ISeriesApi extends IPopcornTimeResourcesApi {
   getByPage(page: string): Promise<Array<PopcornShow>>
   getById(id: string): Promise<PopcornShow>
 }
 
-export interface IAnimesApi extends IPopcornTimeApi {
+export interface IAnimesApi extends IPopcornTimeResourcesApi {
   getByPage(page: string): Promise<Array<PopcornAnime>>
   getById(id: string): Promise<PopcornAnime>
 }

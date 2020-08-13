@@ -1,6 +1,6 @@
-import { Serie } from '../models/Serie'
+import { Series } from '../models/Series'
 
 export interface ISeriesRepository {
-  getAll(): Promise<Serie[]>
-  saveMany(series: Serie[]): void
+  getAll(): Promise<Series[]>
+  saveMany(series: Series[]): void
 }
