@@ -21,10 +21,4 @@ export class AnimesApi implements IPopcornTimeResourcesApi {
     const responseArray = JSON.parse(response)
     return responseArray
   }
-
-  async getById(id: string): Promise<PopcornAnime> {
-    const response = await this.client.get(`anime/${id}`)
-    const responseObject: PopcornAnime = JSON.parse(response)
-    return responseObject
-  }
 }

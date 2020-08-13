@@ -27,5 +27,8 @@ describe('AnimesApiAccess', () => {
 
     const secondPage = await animesApi.getByPage('animes/2')
     expect(secondPage).toEqual(apiResources.animes['animes/2'])
+
+    const emptyPage = await animesApi.getByPage('animes/3')
+    expect(emptyPage).toEqual([])
   })
 })
