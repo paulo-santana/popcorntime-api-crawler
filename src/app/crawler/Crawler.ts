@@ -29,6 +29,7 @@ export enum CrawlerEvents {
 export enum CrawlerEventReasons {
   ApiNotIdle,
   ApiNotUpdated,
+  CrawlingFinished,
 }
 
 export enum CrawlerStatus {
@@ -111,6 +112,7 @@ export class Crawler {
 
     this.lastApiStatus = currentApiStatus
     await this.crawl()
+    this.notifyFor(CrawlerEvents.Stop, CrawlerEventReasons.CrawlingFinished)
   }
 
   stop(): void {
