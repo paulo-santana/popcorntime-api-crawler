@@ -15,6 +15,7 @@ import { AnimesApiStub } from '../helpers/mocks/AnimesApiStub'
 import { StatusApiStub } from '../helpers/mocks/StatusApiStub'
 import { MovieRepositoryStub } from '../helpers/mocks/data/MovieRepositoryStub'
 import { SeriesRepositoryStub } from '../helpers/mocks/data/SeriesRepositoryStub'
+import { AnimesRepositoryStub } from '../helpers/mocks/data/AnimesRepositoryStub'
 
 const makeSut = () => {
   const moviesApi = new MoviesApiStub()
@@ -27,12 +28,16 @@ const makeSut = () => {
   const slugger = new Slugger()
   const movieRepository = new MovieRepositoryStub()
   const seriesRepository = new SeriesRepositoryStub()
-  const repositories = { movieRepository, seriesRepository }
+  const animesRepository = new AnimesRepositoryStub()
+  const repositories = {
+    movieRepository,
+    seriesRepository,
+    animesRepository,
+  }
 
   const popcornMovieAdapter = new PopcornMovieAdapter()
   const popcornSerieAdapter = new PopcornSerieAdapter()
   const popcornAnimeAdapter = new PopcornAnimeAdapter()
-
   const adapters = {
     popcornMovieAdapter,
     popcornSerieAdapter,
@@ -250,6 +255,30 @@ describe('Crawler', () => {
         )
         await crawler.start()
         expect(adaptAnimes).toBeCalled()
+      })
+
+      it('should save adapted, new series into the repository', async () => {
+        const { crawler, config } = makeSut()
+        const saveMany = jest.spyOn(
+          config.repositories.animesRepository,
+          'saveMany'
+        )
+        await crawler.start()
+        expect(saveMany).toBeCalled()
+        expect(config.repositories.animesRepository.animesPool).toHaveLength(
+          config.apiClients.animesApi.popcornAnimes.length
+        )
+      })
+
+      it('should save only animes that are new to database', async () => {
+        const { crawler, config } = makeSut()
+        const newAnimes = config.repositories.animesRepository.simulatePreviousCrawlAndReturnUnsavedAnimes()
+        const saveMany = jest.spyOn(
+          config.repositories.animesRepository,
+          'saveMany'
+        )
+        await crawler.start()
+        expect(saveMany).toBeCalledWith(newAnimes)
       })
     })
   })
