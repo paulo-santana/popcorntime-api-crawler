@@ -21,21 +21,9 @@ import {
   PopcornShow,
 } from '@/services/popcornTimeTypes'
 import { ISlugger } from '@/utils'
-
-export enum CrawlerEvents {
-  Stop = 'stop',
-}
-
-export enum CrawlerEventReasons {
-  ApiNotIdle,
-  ApiNotUpdated,
-  CrawlingFinished,
-}
-
-export enum CrawlerStatus {
-  Idle = 'IDLE',
-  Crawling = 'CRAWLING',
-}
+import { CrawlerEvents } from './ECrawlerEvents'
+import { CrawlerEventReasons } from './ECrawlerEventReasons'
+import { CrawlerStatus } from './ECrawlerStatus'
 
 export type ApiClientTypes = {
   statusApi: IPopcornTimeStatusApi
