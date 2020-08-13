@@ -9,6 +9,7 @@ import { Slugger } from '@/utils'
 import { PopcornMoviesAdapter } from '@/data/adapters/PopcornMoviesAdapter'
 import { PopcornSeriesAdapter } from '@/data/adapters/PopcornSeriesAdapter'
 import { PopcornAnimesAdapter } from '@/data/adapters/PopcornAnimesAdapter'
+
 import { MoviesApiStub } from '../helpers/mocks/MoviesApiStub'
 import { SeriesApiStub } from '../helpers/mocks/SeriesApiStub'
 import { AnimesApiStub } from '../helpers/mocks/AnimesApiStub'
@@ -22,10 +23,10 @@ const makeSut = () => {
   const seriesApi = new SeriesApiStub()
   const animesApi = new AnimesApiStub()
   const statusApi = new StatusApiStub()
-
   const apiClients = { statusApi, moviesApi, seriesApi, animesApi }
 
   const slugger = new Slugger()
+
   const moviesRepository = new MoviesRepositoryStub()
   const seriesRepository = new SeriesRepositoryStub()
   const animesRepository = new AnimesRepositoryStub()
@@ -177,6 +178,18 @@ describe('Crawler', () => {
         const slug = jest.spyOn(config.slugger, 'slug')
         await crawler.start()
         expect(slug).toBeCalled()
+      })
+
+      it('should slug movies with ID if there are repeated slugs in database', async () => {
+        const { crawler, config } = makeSut()
+        config.repositories.moviesRepository.moviesPool.push({
+          _id: 'tt0118661',
+          slug: config.slugger.slug('The Avengers'),
+          title: 'The Avengers',
+        })
+        const slugWithId = jest.spyOn(config.slugger, 'slugWithId')
+        await crawler.start()
+        expect(slugWithId).toBeCalledWith('The Avengers', 'tt0848228')
       })
 
       it('should save adapted, new movies into the repository', async () => {

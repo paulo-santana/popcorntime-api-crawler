@@ -1,4 +1,4 @@
-import { PopcornApiStatus } from '@/services'
+import { PopcornApiStatus } from '@/data/api'
 import { apiStatusStub } from './mocks'
 
 export class StatusApiStub {
