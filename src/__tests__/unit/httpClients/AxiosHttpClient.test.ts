@@ -19,4 +19,16 @@ describe('AxiosHttpClient', () => {
     const response = await axiosClient.get('status')
     expect(response).toEqual(JSON.stringify(apiStatusStub))
   })
+
+  it('fetches path sent in parameter', async () => {
+    const { axiosClient } = makeSut()
+    const clientGet = jest
+      .spyOn(mockedAxios, 'get')
+      .mockResolvedValue({ data: 'foo' })
+    await axiosClient.get('status')
+    expect(clientGet).toBeCalledWith('status', { responseType: 'text' })
+
+    await axiosClient.get('movies/1')
+    expect(clientGet).toBeCalledWith('movies/1', { responseType: 'text' })
+  })
 })
