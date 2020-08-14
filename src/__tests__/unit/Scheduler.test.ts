@@ -1,36 +1,12 @@
 import Cron from 'cron'
 import { mocked } from 'ts-jest/utils'
+import { CronScheduler } from '@/app/scheduler/Scheduler'
 
 jest.mock('cron')
 
 const mockedCron = mocked(Cron, true)
 
 // eslint-disable-next-line max-classes-per-file
-class CronScheduler {
-  timer: Cron.CronJob
-  jobs: Array<() => void> = []
-
-  constructor(schedule = '0 * * * *') {
-    this.timer = new Cron.CronJob(schedule, this.runJobs)
-  }
-
-  start() {
-    this.timer.start()
-  }
-
-  stop() {
-    this.timer.stop()
-  }
-
-  addJob(job: () => void) {
-    this.jobs.push(job)
-  }
-
-  runJobs() {
-    this.jobs.forEach(job => job())
-  }
-}
-
 const makeSut = () => {
   const scheduler = new CronScheduler()
   return { scheduler }
