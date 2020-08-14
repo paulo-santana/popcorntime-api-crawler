@@ -26,11 +26,27 @@ describe('Scheduler', () => {
     jest
       .spyOn(mockedCron.CronJob.prototype, 'start')
       .mockImplementationOnce(() => {
+        mockedCron.CronJob.prototype.running = true
         scheduler.runJobs()
       })
     scheduler.addJob(job)
+    expect(scheduler.timer.running).not.toBe(true)
     scheduler.start()
     expect(job).toBeCalled()
+    expect(scheduler.timer.running).toBe(true)
     jest.clearAllMocks()
+  })
+
+  it('should be able to stop timer', () => {
+    const { scheduler } = makeSut()
+    const stop = jest
+      .spyOn(mockedCron.CronJob.prototype, 'stop')
+      .mockImplementationOnce(() => {
+        mockedCron.CronJob.prototype.running = false
+      })
+    scheduler.start()
+    scheduler.stop()
+    expect(stop).toBeCalledTimes(1)
+    expect(scheduler.timer.running).toBe(false)
   })
 })
