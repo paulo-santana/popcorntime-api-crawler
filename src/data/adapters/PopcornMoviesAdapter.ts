@@ -7,6 +7,7 @@ export class PopcornMoviesAdapter {
       return {
         _id: popcornMovie._id,
         title: popcornMovie.title,
+        slug: '',
       }
     })
     return movies
