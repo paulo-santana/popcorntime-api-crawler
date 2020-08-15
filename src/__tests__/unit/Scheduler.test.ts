@@ -3,14 +3,18 @@ import { NodeCronScheduler } from '@/app/scheduler/Scheduler'
 import { mocked } from 'ts-jest/utils'
 
 class ScheduledTaskSpy implements ScheduledTask {
+  cronExpression: string
   func: () => void
+  options?: ScheduleOptions
 
   constructor(
-    private readonly cronExpression: string,
+    cronExpression: string,
     func: () => void,
-    private readonly options?: ScheduleOptions
+    options?: ScheduleOptions
   ) {
+    this.cronExpression = cronExpression
     this.func = func
+    this.options = options
   }
 
   start(): this {
@@ -21,6 +25,7 @@ class ScheduledTaskSpy implements ScheduledTask {
   stop(): this {
     return this
   }
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
   destroy(): void {}
   getStatus(): string {
     return ''
