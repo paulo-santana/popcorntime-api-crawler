@@ -1,4 +1,4 @@
-import { IMoviesRepository } from '@/data/repositories/IMovieRepository'
+import { IMoviesRepository } from '@/data/repositories/IMoviesRepository'
 import { Movie } from '@/data/models/Movie'
 import { PopcornMoviesAdapter } from '@/data/adapters/PopcornMoviesAdapter'
 import { Slugger } from '@/utils/Slugger'
