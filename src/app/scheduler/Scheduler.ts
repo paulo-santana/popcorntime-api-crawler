@@ -1,19 +1,22 @@
-import { CronJob } from 'cron'
+import nodeCron, { ScheduledTask } from 'node-cron'
 
-export class CronScheduler {
-  timer: CronJob
-  jobs: Array<() => void> = []
+export class NodeCronScheduler {
+  scheduledTask: ScheduledTask
+  jobs: Array<() => void>
 
   constructor(schedule = '0 * * * *') {
-    this.timer = new CronJob(schedule, this.runJobs)
+    this.jobs = new Array<() => void>()
+    this.scheduledTask = nodeCron.schedule(schedule, () => this.runJobs(), {
+      scheduled: false,
+    })
   }
 
   start(): void {
-    this.timer.start()
+    this.scheduledTask.start()
   }
 
   stop(): void {
-    this.timer.stop()
+    this.scheduledTask.stop()
   }
 
   addJob(job: () => void): void {
@@ -21,6 +24,12 @@ export class CronScheduler {
   }
 
   runJobs(): void {
-    this.jobs.forEach(job => job())
+    if (this.jobs) this.jobs.forEach(job => job())
+  }
+
+  reschedule(time: string): void {
+    this.scheduledTask.stop()
+    this.scheduledTask.destroy()
+    this.scheduledTask = nodeCron.schedule(time, () => this.runJobs())
   }
 }
