@@ -1,7 +1,9 @@
 /* eslint-disable no-await-in-loop */
-import { PopcornAnimesAdapter } from '@/data/adapters/PopcornAnimesAdapter'
-import { PopcornMoviesAdapter } from '@/data/adapters/PopcornMoviesAdapter'
-import { PopcornSeriesAdapter } from '@/data/adapters/PopcornSeriesAdapter'
+import {
+  PopcornAnimesAdapter,
+  PopcornMoviesAdapter,
+  PopcornSeriesAdapter,
+} from '@/data/adapters'
 import {
   IAnimesApi,
   IMoviesApi,
@@ -9,9 +11,7 @@ import {
   ISeriesApi,
   PopcornApiStatus,
 } from '@/data/api'
-import { Anime } from '@/data/models/Anime'
-import { Movie } from '@/data/models/Movie'
-import { Series } from '@/data/models/Series'
+import { Anime, Movie, Series } from '@/data/models'
 import {
   IAnimesRepository,
   IMoviesRepository,

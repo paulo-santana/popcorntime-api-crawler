@@ -1,22 +1,22 @@
 import {
   Crawler,
-  CrawlerStatus,
-  CrawlerEvents,
   CrawlerEventReasons,
+  CrawlerEvents,
+  CrawlerStatus,
 } from '@/app/crawler'
-
+import {
+  PopcornAnimesAdapter,
+  PopcornMoviesAdapter,
+  PopcornSeriesAdapter,
+} from '@/data/adapters'
 import { Slugger } from '@/utils'
-import { PopcornMoviesAdapter } from '@/data/adapters/PopcornMoviesAdapter'
-import { PopcornSeriesAdapter } from '@/data/adapters/PopcornSeriesAdapter'
-import { PopcornAnimesAdapter } from '@/data/adapters/PopcornAnimesAdapter'
-
+import { AnimesApiStub } from '../helpers/mocks/data/api/AnimesApiStub'
 import { MoviesApiStub } from '../helpers/mocks/data/api/MoviesApiStub'
 import { SeriesApiStub } from '../helpers/mocks/data/api/SeriesApiStub'
 import { StatusApiStub } from '../helpers/mocks/data/api/StatusApiStub'
-import { AnimesApiStub } from '../helpers/mocks/data/api/AnimesApiStub'
+import { AnimesRepositoryStub } from '../helpers/mocks/data/repositories/AnimesRepositoryStub'
 import { MoviesRepositoryStub } from '../helpers/mocks/data/repositories/MoviesRepositoryStub'
 import { SeriesRepositoryStub } from '../helpers/mocks/data/repositories/SeriesRepositoryStub'
-import { AnimesRepositoryStub } from '../helpers/mocks/data/repositories/AnimesRepositoryStub'
 
 const makeSut = () => {
   const moviesApi = new MoviesApiStub()
