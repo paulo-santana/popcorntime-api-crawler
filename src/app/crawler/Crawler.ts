@@ -12,17 +12,19 @@ import {
 import { Anime } from '@/data/models/Anime'
 import { Movie } from '@/data/models/Movie'
 import { Series } from '@/data/models/Series'
-import { IMoviesRepository } from '@/data/repositories'
-import { IAnimesRepository } from '@/data/repositories/IAnimesRepository'
-import { ISeriesRepository } from '@/data/repositories/ISeriesRepository'
+import {
+  IAnimesRepository,
+  IMoviesRepository,
+  ISeriesRepository,
+} from '@/data/repositories'
 import {
   PopcornAnime,
   PopcornMovie,
   PopcornShow,
 } from '@/services/popcornTimeTypes'
 import { ISlugger } from '@/utils'
-import { CrawlerEvents } from './ECrawlerEvents'
 import { CrawlerEventReasons } from './ECrawlerEventReasons'
+import { CrawlerEvents } from './ECrawlerEvents'
 import { CrawlerStatus } from './ECrawlerStatus'
 
 export type ApiClientTypes = {

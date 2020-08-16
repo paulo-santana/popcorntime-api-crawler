@@ -1,4 +1,4 @@
-import { ISeriesRepository } from '@/data/repositories/ISeriesRepository'
+import { ISeriesRepository } from '@/data/repositories'
 import { Series } from '@/data/models/Series'
 import { PopcornSeriesAdapter } from '@/data/adapters/PopcornSeriesAdapter'
 import { apiResources, showsPagesTypes } from '../../mocks'

@@ -1,3 +1,3 @@
-export * from './IMovieRepository'
-export * from './IAnimesRepository'
-export * from './ISeriesRepository'
+export * from './MoviesRepository'
+export * from './AnimesRepository'
+export * from './SeriesRepository'
