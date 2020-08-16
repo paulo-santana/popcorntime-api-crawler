@@ -17,7 +17,7 @@ export class SeriesRepository {
     await this.databaseClient.saveMany(items)
   }
 
-  getAll(): Promise<Series[]> {
+  async getAll(): Promise<Series[]> {
     return this.databaseClient.getAll()
   }
 }
