@@ -1,23 +1,4 @@
 import { Series } from '@/data/models/Series'
-import { IDatabaseClient } from '@/data/database/IDatabaseClient'
+import { RepositoryBase } from './RepositoryBase'
 
-export interface ISeriesRepository {
-  getAll(): Promise<Series[]>
-  saveMany(series: Series[]): void
-}
-
-export class SeriesRepository {
-  databaseClient: IDatabaseClient
-
-  constructor(databaseClient: IDatabaseClient) {
-    this.databaseClient = databaseClient
-  }
-
-  async saveMany(items: Series[]): Promise<void> {
-    await this.databaseClient.saveMany(items)
-  }
-
-  async getAll(): Promise<Series[]> {
-    return this.databaseClient.getAll()
-  }
-}
+export class SeriesRepository extends RepositoryBase<Series> {}

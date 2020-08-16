@@ -12,11 +12,7 @@ import {
   PopcornApiStatus,
 } from '@/data/api'
 import { Anime, Movie, Series } from '@/data/models'
-import {
-  IAnimesRepository,
-  IMoviesRepository,
-  ISeriesRepository,
-} from '@/data/repositories'
+import { IRepository } from '@/data/repositories'
 import {
   PopcornAnime,
   PopcornMovie,
@@ -40,9 +36,9 @@ export type AdapterTypes = {
   popcornAnimesAdapter: PopcornAnimesAdapter
 }
 export type RepositoryTypes = {
-  moviesRepository: IMoviesRepository
-  seriesRepository: ISeriesRepository
-  animesRepository: IAnimesRepository
+  moviesRepository: IRepository<Movie>
+  seriesRepository: IRepository<Series>
+  animesRepository: IRepository<Anime>
 }
 
 export type Observer = {
