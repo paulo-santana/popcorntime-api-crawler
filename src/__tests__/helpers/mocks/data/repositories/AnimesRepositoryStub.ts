@@ -1,11 +1,11 @@
 import { PopcornAnimesAdapter } from '@/data/adapters/PopcornAnimesAdapter'
 import { Anime } from '@/data/models/Anime'
-import { IAnimesRepository } from '@/data/repositories'
+import { IRepository } from '@/data/repositories'
 import { animesPagesTypes, apiResources } from '../../mocks'
 
 const { animes } = apiResources
 
-export class AnimesRepositoryStub implements IAnimesRepository {
+export class AnimesRepositoryStub implements IRepository<Anime> {
   animesPool: Anime[] = []
 
   /**

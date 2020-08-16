@@ -1,26 +1,35 @@
 import { PopcornMoviesAdapter } from '@/data/adapters/PopcornMoviesAdapter'
-import { IDatabaseClient } from '@/data/database/IDatabaseClient'
 import { Movie } from '@/data/models/Movie'
 import { MoviesRepository } from '@/data/repositories/MoviesRepository'
 import { Slugger } from '@/utils'
+import dotenv from 'dotenv'
+import { Db, MongoClient } from 'mongodb'
 import { apiResources } from '../../helpers/mocks/mocks'
 
-const makeSut = () => {
-  class DatabaseClientSpy implements IDatabaseClient<Movie> {
-    pool: Array<Movie> = []
+dotenv.config()
+const { MONGO_URL } = process.env
+let client: MongoClient
+let db: Db
 
-    async saveMany(movies: Movie[]): Promise<void> {
-      this.pool.push(...movies)
-      return Promise.resolve()
-    }
-
-    async getAll(): Promise<Array<Movie>> {
-      return this.pool
-    }
+beforeAll(async () => {
+  if (MONGO_URL !== undefined && MONGO_URL !== '') {
+    client = await MongoClient.connect(MONGO_URL, {
+      useUnifiedTopology: true,
+    })
+    db = client.db()
   }
+})
 
-  const databaseClientSpy = new DatabaseClientSpy()
-  const moviesRepository = new MoviesRepository(databaseClientSpy)
+afterEach(async () => {
+  await db.dropCollection('movies')
+})
+
+afterAll(async () => {
+  await client.close()
+})
+
+const makeSut = () => {
+  const moviesRepository = new MoviesRepository(db, 'movies')
 
   const moviesFactory = () => {
     const popcornMovies = apiResources.movies['movies/1']
@@ -39,25 +48,22 @@ const makeSut = () => {
 
   return {
     moviesRepository,
-    databaseClient: databaseClientSpy,
     movies: moviesFactory(),
   }
 }
 
 describe('Movies Repository', () => {
   it('saves a list of movies correctly', async () => {
-    const { moviesRepository, databaseClient, movies } = makeSut()
-    const saveMany = jest.spyOn(databaseClient, 'saveMany')
+    const { moviesRepository, movies } = makeSut()
     await moviesRepository.saveMany(movies)
-    expect(saveMany).toHaveBeenCalledWith(movies)
+    const savedMovies = await db.collection<Movie>('movies').find().toArray()
+    expect(movies).toEqual(savedMovies)
   })
 
   it('gets the list of all movies in the database', async () => {
-    const { moviesRepository, databaseClient, movies } = makeSut()
-    const getAll = jest.spyOn(databaseClient, 'getAll')
-    databaseClient.pool.push(...movies)
+    const { moviesRepository, movies } = makeSut()
+    await db.collection('movies').insertMany(movies)
     const allMovies = await moviesRepository.getAll()
-    expect(getAll).toHaveBeenCalled()
     expect(allMovies).toEqual(movies)
   })
 })

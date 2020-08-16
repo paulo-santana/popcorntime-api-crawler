@@ -1,11 +1,11 @@
-import { ISeriesRepository } from '@/data/repositories'
+import { IRepository } from '@/data/repositories'
 import { Series } from '@/data/models/Series'
 import { PopcornSeriesAdapter } from '@/data/adapters/PopcornSeriesAdapter'
 import { apiResources, showsPagesTypes } from '../../mocks'
 
 const { shows } = apiResources
 
-export class SeriesRepositoryStub implements ISeriesRepository {
+export class SeriesRepositoryStub implements IRepository<Series> {
   seriesPool: Series[] = []
 
   /**

@@ -1,4 +1,4 @@
-import { IMoviesRepository } from '@/data/repositories'
+import { IRepository } from '@/data/repositories'
 import { Movie } from '@/data/models/Movie'
 import { PopcornMoviesAdapter } from '@/data/adapters/PopcornMoviesAdapter'
 import { Slugger } from '@/utils/Slugger'
@@ -6,7 +6,7 @@ import { apiResources, moviesPagesTypes } from '../../mocks'
 
 const { movies } = apiResources
 
-export class MoviesRepositoryStub implements IMoviesRepository {
+export class MoviesRepositoryStub implements IRepository<Movie> {
   getAll(): Promise<Movie[]> {
     return new Promise(resolve => resolve(this.moviesPool))
   }
