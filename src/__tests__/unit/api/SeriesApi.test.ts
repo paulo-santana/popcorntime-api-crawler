@@ -1,6 +1,6 @@
 import { SeriesApi } from '@/data/api'
-import makeHttpClient from '../helpers/httpClientFactory'
-import { apiResources } from '../helpers/mocks/mocks'
+import makeHttpClient from '../../helpers/httpClientFactory'
+import { apiResources } from '../../helpers/mocks/mocks'
 
 const makeSut = () => {
   const httpClient = makeHttpClient()

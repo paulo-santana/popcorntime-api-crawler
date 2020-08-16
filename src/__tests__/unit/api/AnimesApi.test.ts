@@ -1,6 +1,6 @@
 import { AnimesApi } from '@/data/api'
-import { apiResources } from '../helpers/mocks/mocks'
-import makeHttpClient from '../helpers/httpClientFactory'
+import { apiResources } from '../../helpers/mocks/mocks'
+import makeHttpClient from '../../helpers/httpClientFactory'
 
 const makeSut = () => {
   const httpClient = makeHttpClient()
