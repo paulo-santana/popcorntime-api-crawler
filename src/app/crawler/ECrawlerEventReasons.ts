@@ -1,5 +1,5 @@
 export enum CrawlerEventReasons {
-  ApiNotIdle,
-  ApiNotUpdated,
-  CrawlingFinished,
+  ApiNotIdle = 'ApiNotIdle',
+  ApiNotUpdated = 'ApiNotUpdated',
+  CrawlingFinished = 'CrawlingFinished',
 }
