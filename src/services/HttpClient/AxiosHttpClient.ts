@@ -9,7 +9,7 @@ export class AxiosHttpClient implements IHttpClient {
   }
 
   async get(uri: string): Promise<string> {
-    const response = await this.axios.get(uri, { responseType: 'text' })
-    return response.data
+    const response = await this.axios.get(uri)
+    return JSON.stringify(response.data)
   }
 }
