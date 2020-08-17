@@ -5,7 +5,7 @@ export interface ISlugger {
 
 export class Slugger implements ISlugger {
   slugWithId(title: string, id: string): string {
-    return `${title}-${id}`
+    return this.slugify(`${title}-${id}`)
   }
 
   slug(title: string): string {
