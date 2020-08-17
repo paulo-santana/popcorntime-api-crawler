@@ -1,35 +1,28 @@
 import { PopcornMoviesAdapter } from '@/data/adapters/PopcornMoviesAdapter'
 import { Movie } from '@/data/models/Movie'
+import { MongoHelper } from '@/data/repositories/helpers/MongoHelper'
 import { MoviesRepository } from '@/data/repositories/MoviesRepository'
 import { Slugger } from '@/utils'
-import dotenv from 'dotenv'
-import { Db, MongoClient } from 'mongodb'
 import { apiResources } from '../../helpers/mocks/mocks'
 
-dotenv.config()
 const { MONGO_URL } = process.env
-let client: MongoClient
-let db: Db
 
 beforeAll(async () => {
   if (MONGO_URL !== undefined && MONGO_URL !== '') {
-    client = await MongoClient.connect(MONGO_URL, {
-      useUnifiedTopology: true,
-    })
-    db = client.db()
+    await MongoHelper.connect(MONGO_URL)
   }
 })
 
 afterEach(async () => {
-  await db.dropCollection('movies')
+  await MongoHelper.getCollection('movies').deleteMany({})
 })
 
 afterAll(async () => {
-  await client.close()
+  await MongoHelper.disconnect()
 })
 
 const makeSut = () => {
-  const moviesRepository = new MoviesRepository(db, 'movies')
+  const moviesRepository = new MoviesRepository('movies')
 
   const moviesFactory = () => {
     const popcornMovies = apiResources.movies['movies/1']
@@ -56,13 +49,15 @@ describe('Movies Repository', () => {
   it('saves a list of movies correctly', async () => {
     const { moviesRepository, movies } = makeSut()
     await moviesRepository.saveMany(movies)
-    const savedMovies = await db.collection<Movie>('movies').find().toArray()
-    expect(movies).toEqual(savedMovies)
+    const savedMovies = await MongoHelper.getCollection('movies')
+      .find()
+      .toArray()
+    expect(savedMovies).toEqual(movies)
   })
 
   it('gets the list of all movies in the database', async () => {
     const { moviesRepository, movies } = makeSut()
-    await db.collection('movies').insertMany(movies)
+    await MongoHelper.getCollection('movies').insertMany(movies)
     const allMovies = await moviesRepository.getAll()
     expect(allMovies).toEqual(movies)
   })
