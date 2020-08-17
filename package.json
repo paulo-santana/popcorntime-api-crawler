@@ -7,6 +7,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
+    "dev": "ts-node-dev --unhandled-rejections=strict --respawn --transpile-only src/index.ts",
     "test": "jest",
     "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand"
   },
@@ -33,6 +34,7 @@
     "jest": "^26.2.2",
     "prettier": "^2.0.5",
     "ts-jest": "^26.1.4",
+    "ts-node-dev": "^1.0.0-pre.57",
     "typescript": "^3.9.7"
   }
 }
