@@ -1,4 +1,5 @@
-import { Db, Collection } from 'mongodb'
+import { Collection } from 'mongodb'
+import { MongoHelper } from './helpers/MongoHelper'
 
 export interface IRepository<T> {
   getAll(): Promise<T[]>
@@ -8,8 +9,8 @@ export interface IRepository<T> {
 export class RepositoryBase<T> implements IRepository<T> {
   private readonly collection: Collection
 
-  constructor(db: Db, collectionName: string) {
-    this.collection = db.collection(collectionName)
+  constructor(collectionName: string) {
+    this.collection = MongoHelper.getCollection(collectionName)
   }
 
   async saveMany(entities: T[]): Promise<void> {
