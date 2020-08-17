@@ -13,15 +13,8 @@ import {
 } from '@/data/api'
 import { Anime, Movie, Series } from '@/data/models'
 import { IRepository } from '@/data/repositories'
-import {
-  PopcornAnime,
-  PopcornMovie,
-  PopcornShow,
-} from '@/services/popcornTimeTypes'
 import { ISlugger } from '@/utils'
-import { CrawlerEventReasons } from './ECrawlerEventReasons'
-import { CrawlerEvents } from './ECrawlerEvents'
-import { CrawlerStatus } from './ECrawlerStatus'
+import { CrawlerEventReasons, CrawlerEvents, CrawlerStatus } from '.'
 
 export type ApiClientTypes = {
   statusApi: IPopcornTimeStatusApi
@@ -134,15 +127,16 @@ export class Crawler {
 
     const pages = await moviesApi.getPages()
 
-    const popcornMovies: PopcornMovie[] = []
+    const { adaptMovies } = this.adapters.popcornMoviesAdapter
+    const movies: Movie[] = []
     for (let i = 0; i < pages.length; i++) {
       const page = pages[i]
       // eslint-disable-next-line no-await-in-loop
-      const foundMovies = await moviesApi.getByPage(page)
-      popcornMovies.push(...foundMovies)
+      const popcornMovies = await moviesApi.getByPage(page)
+      const adaptedMovies = adaptMovies(popcornMovies)
+      movies.push(...adaptedMovies)
     }
 
-    const movies = this.adapters.popcornMoviesAdapter.adaptMovies(popcornMovies)
     const newSluggedMovies = await this.filterAndSlugNewMovies(movies)
     this.repositories.moviesRepository.saveMany(newSluggedMovies)
   }
@@ -184,14 +178,15 @@ export class Crawler {
     const { seriesApi } = this.apiClients
     const pages = await seriesApi.getPages()
 
-    const popcornShows: PopcornShow[] = []
+    const { adaptSeries } = this.adapters.popcornSeriesAdapter
+    const series: Series[] = []
     for (let i = 0; i < pages.length; i++) {
       const page = pages[i]
       const foundShows = await seriesApi.getByPage(page)
-      popcornShows.push(...foundShows)
+      const adaptedSeries = adaptSeries(foundShows)
+      series.push(...adaptedSeries)
     }
 
-    const series = this.adapters.popcornSeriesAdapter.adaptSeries(popcornShows)
     const newSeries = await this.filterNewSeries(series)
     this.repositories.seriesRepository.saveMany(newSeries)
   }
@@ -208,14 +203,15 @@ export class Crawler {
     const { animesApi } = this.apiClients
     const pages = await animesApi.getPages()
 
-    const popcornAnimes: PopcornAnime[] = []
+    const { adaptAnimes } = this.adapters.popcornAnimesAdapter
+    const animes: Anime[] = []
     for (let i = 0; i < pages.length; i++) {
       const page = pages[i]
       const foundAnimes = await animesApi.getByPage(page)
-      popcornAnimes.push(...foundAnimes)
+      const adaptedAnimes = adaptAnimes(foundAnimes)
+      animes.push(...adaptedAnimes)
     }
 
-    const animes = this.adapters.popcornAnimesAdapter.adaptAnimes(popcornAnimes)
     const newAnimes = await this.filterNewAnimes(animes)
     this.repositories.animesRepository.saveMany(newAnimes)
   }
