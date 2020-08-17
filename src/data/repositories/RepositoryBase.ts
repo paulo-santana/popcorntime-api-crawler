@@ -14,7 +14,9 @@ export class RepositoryBase<T> implements IRepository<T> {
   }
 
   async saveMany(entities: T[]): Promise<void> {
-    await this.collection.insertMany(entities)
+    await this.collection.insertMany(entities, {
+      ordered: false,
+    })
   }
 
   async getAll(): Promise<T[]> {
