@@ -17,35 +17,31 @@ import { NodeCronScheduler } from './app/scheduler/Scheduler'
 
 class App {
   async run(): Promise<void> {
-    console.log('Application starting')
-    console.log('Setting up dependencies')
-
     const slugger = new Slugger()
 
     const popcornAnimesAdapter = new PopcornAnimesAdapter()
     const popcornMoviesAdapter = new PopcornMoviesAdapter()
     const popcornSeriesAdapter = new PopcornSeriesAdapter()
 
-    const statusBaseUrl = 'https://anime.api-fetch.sh'
+    const statusBaseUrl = 'http://localhost:3333'
     const statusClient = new AxiosHttpClient(statusBaseUrl)
     const statusApi = new StatusApi(statusClient)
 
-    const animeBaseUrl = 'https://anime.api-fetch.sh'
+    const animeBaseUrl = 'http://localhost:3333'
     const animesClient = new AxiosHttpClient(animeBaseUrl)
     const animesApi = new AnimesApi(animesClient)
 
-    const moviesBaseUrl = 'https://movies-v2.api-fetch.sh'
+    const moviesBaseUrl = 'http://localhost:3333'
     const moviesClient = new AxiosHttpClient(moviesBaseUrl)
     const moviesApi = new MoviesApi(moviesClient)
 
-    const seriesBaseUrl = 'https://tv-v2.api-fetch.sh'
+    const seriesBaseUrl = 'http://localhost:3333'
     const seriesClient = new AxiosHttpClient(seriesBaseUrl)
     const seriesApi = new SeriesApi(seriesClient)
 
     const mongoUri = 'mongodb://localhost:27017/catalog'
-    console.log('awaiting for database to connect...')
+
     await MongoHelper.connect(mongoUri)
-    console.log('done!')
 
     const animesRepository = new AnimesRepository('animes')
     const seriesRepository = new SeriesRepository('series')
@@ -71,15 +67,18 @@ class App {
       },
     })
 
-    const scheduler = new NodeCronScheduler('34 * * * *') // hourly
+    const scheduler = new NodeCronScheduler('50 3 * * * *') // hourly
     scheduler.addJob(() => {
-      console.log('running crawler!')
       crawler.start()
     })
 
     const logEvent = (reason: CrawlerEventReasons) => {
-      console.log(`Crawling stoped due to reason: "${reason}"`)
-      console.log('Rescheduling...')
+      if (reason === CrawlerEventReasons.CrawlingFinished) {
+        console.log('Funcionou porra!!')
+      } else {
+        console.log(`Crawling stopped due to reason: "${reason}"`)
+        console.log('Rescheduling...')
+      }
     }
 
     let wasRescheduled = false
@@ -101,10 +100,7 @@ class App {
       }
     })
 
-    console.log('starting scheduler!')
     scheduler.start()
-    console.log('Setup done!')
-    console.log('Patiently awaiting the next crawl time schedule...')
   }
 }
 

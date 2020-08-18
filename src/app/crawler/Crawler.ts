@@ -13,7 +13,9 @@ import {
 } from '@/data/api'
 import { Anime, Movie, Series } from '@/data/models'
 import { IRepository } from '@/data/repositories'
-import { ISlugger } from '@/utils'
+import { ISlugger, JsonFileEditor } from '@/utils'
+import { Logger } from '../logger/Logger'
+
 import { CrawlerEventReasons, CrawlerEvents, CrawlerStatus } from '.'
 
 export type ApiClientTypes = {
@@ -55,7 +57,12 @@ export class Crawler {
   private slugger: ISlugger
   private repositories: RepositoryTypes
   private adapters: AdapterTypes
+
+  private loggingActive = false
+
   lastUpdate = 0
+
+  private readonly apiFile = 'apiStatus.json'
 
   get status(): string {
     return this._status
@@ -66,16 +73,35 @@ export class Crawler {
     this.slugger = config.slugger
     this.repositories = config.repositories
     this.adapters = config.adapters
+
+    const lastSavedStatus = JsonFileEditor.getFile<PopcornApiStatus>(
+      this.apiFile
+    )
+    if (lastSavedStatus) {
+      this.lastApiStatus = lastSavedStatus
+    }
+  }
+
+  private log(message: string) {
+    if (this.loggingActive) {
+      Logger.print('Crawler', message)
+    }
   }
 
   async start(): Promise<void> {
+    this.log('crawling started!')
     this._status = CrawlerStatus.Crawling
+
+    this.log('getting API status')
     const { statusApi } = this.apiClients
     const currentApiStatus = await statusApi.getStatus()
+    this.log('getting API status: done!')
 
     if (!currentApiStatus) throw new Error('Falhou no engano')
+    JsonFileEditor.saveFile(this.apiFile, currentApiStatus)
 
     if (currentApiStatus.status !== 'Idle') {
+      this.log('API is not Idle. Stopping crawl')
       this.notifyFor(CrawlerEvents.Stop, CrawlerEventReasons.ApiNotIdle)
       this.stop()
       return
@@ -83,6 +109,7 @@ export class Crawler {
 
     if (this.lastApiStatus) {
       if (this.lastApiStatus?.updated >= currentApiStatus.updated) {
+        this.log('API has no update. Stopping crawl')
         this.stop()
         this.notifyFor(CrawlerEvents.Stop, CrawlerEventReasons.ApiNotUpdated)
         return
@@ -90,12 +117,16 @@ export class Crawler {
     }
 
     this.lastApiStatus = currentApiStatus
+    this.log('starting crawl engines')
     await this.crawl()
+
+    this.log('crawling done!')
     this.notifyFor(CrawlerEvents.Stop, CrawlerEventReasons.CrawlingFinished)
   }
 
   stop(): void {
     this._status = CrawlerStatus.Idle
+    this.log('crawl stopped')
   }
 
   async crawl(): Promise<void> {
@@ -123,13 +154,20 @@ export class Crawler {
   }
 
   async crawlMovies(): Promise<void> {
+    this.log('crawling movies!')
     const { moviesApi } = this.apiClients
 
+    this.log('(movies) - fetching movies pages')
     const pages = await moviesApi.getPages()
+    this.log(`(movies) - there are ${pages.length} pages 😳!`)
 
     const { adaptMovies } = this.adapters.popcornMoviesAdapter
     const movies: Movie[] = []
+
+    const tickProgress = Logger.startProgress(pages.length)
+
     for (let i = 0; i < pages.length; i++) {
+      tickProgress()
       const page = pages[i]
       // eslint-disable-next-line no-await-in-loop
       const popcornMovies = await moviesApi.getByPage(page)
@@ -138,7 +176,12 @@ export class Crawler {
     }
 
     const newSluggedMovies = await this.filterAndSlugNewMovies(movies)
-    this.repositories.moviesRepository.saveMany(newSluggedMovies)
+
+    if (newSluggedMovies.length > 0) {
+      this.repositories.moviesRepository.saveMany(newSluggedMovies)
+    } else {
+      this.log('(movies) - Strangely enough, there is no new movie to save...')
+    }
   }
 
   private async filterAndSlugNewMovies(movies: Movie[]): Promise<Movie[]> {
@@ -175,12 +218,19 @@ export class Crawler {
   }
 
   async crawlSeries(): Promise<void> {
+    this.log('crawling series!')
     const { seriesApi } = this.apiClients
+    this.log('(series) - fetching series pages')
     const pages = await seriesApi.getPages()
+    this.log(`(series) - there are ${pages.length} pages`)
 
     const { adaptSeries } = this.adapters.popcornSeriesAdapter
     const series: Series[] = []
+
+    const tickProgress = Logger.startProgress(pages.length)
+
     for (let i = 0; i < pages.length; i++) {
+      tickProgress()
       const page = pages[i]
       const foundShows = await seriesApi.getByPage(page)
       const adaptedSeries = adaptSeries(foundShows)
@@ -188,7 +238,12 @@ export class Crawler {
     }
 
     const newSeries = await this.filterNewSeries(series)
-    this.repositories.seriesRepository.saveMany(newSeries)
+
+    if (newSeries.length > 0) {
+      this.repositories.seriesRepository.saveMany(newSeries)
+    } else {
+      this.log('(series) - No new series this time...')
+    }
   }
 
   private async filterNewSeries(series: Series[]): Promise<Series[]> {
@@ -200,12 +255,20 @@ export class Crawler {
   }
 
   async crawlAnimes(): Promise<void> {
+    this.log('crawling animes!')
     const { animesApi } = this.apiClients
+
+    this.log('(animes) - fetching animes pages')
     const pages = await animesApi.getPages()
+    this.log(`(animes) - there are ${pages.length} pages`)
 
     const { adaptAnimes } = this.adapters.popcornAnimesAdapter
     const animes: Anime[] = []
+
+    const tickProgress = Logger.startProgress(pages.length)
+
     for (let i = 0; i < pages.length; i++) {
+      tickProgress()
       const page = pages[i]
       const foundAnimes = await animesApi.getByPage(page)
       const adaptedAnimes = adaptAnimes(foundAnimes)
@@ -213,7 +276,12 @@ export class Crawler {
     }
 
     const newAnimes = await this.filterNewAnimes(animes)
-    this.repositories.animesRepository.saveMany(newAnimes)
+
+    if (newAnimes.length > 0) {
+      this.repositories.animesRepository.saveMany(newAnimes)
+    } else {
+      this.log('(animes) - no new animes this time')
+    }
   }
 
   private async filterNewAnimes(animes: Anime[]): Promise<Anime[]> {

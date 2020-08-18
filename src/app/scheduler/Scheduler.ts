@@ -1,8 +1,10 @@
 import nodeCron, { ScheduledTask } from 'node-cron'
+import { Logger } from '../logger/Logger'
 
 export class NodeCronScheduler {
   scheduledTask: ScheduledTask
   jobs: Array<() => void>
+  private loggingActive = true
 
   constructor(schedule = '0 * * * *') {
     this.jobs = new Array<() => void>()
@@ -11,8 +13,15 @@ export class NodeCronScheduler {
     })
   }
 
+  private log(message: string) {
+    if (this.loggingActive) {
+      Logger.print('Scheduler', message)
+    }
+  }
+
   start(): void {
     this.scheduledTask.start()
+    this.log(`status: ${this.scheduledTask.getStatus()}`)
   }
 
   stop(): void {
@@ -28,6 +37,7 @@ export class NodeCronScheduler {
   }
 
   reschedule(time: string): void {
+    this.log(`rescheduling to ${time}`)
     this.scheduledTask.stop()
     this.scheduledTask.destroy()
     this.scheduledTask = nodeCron.schedule(time, () => this.runJobs())

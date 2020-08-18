@@ -59,12 +59,12 @@ const makeSut = () => {
 }
 
 describe('Crawler', () => {
-  describe('creation', () => {
-    it('should have status "IDLE" upon creation', () => {
-      const { crawler } = makeSut()
-      expect(crawler.status).toBe(CrawlerStatus.Idle)
-    })
+  it('should have status "IDLE" upon creation', () => {
+    const { crawler } = makeSut()
+    expect(crawler.status).toBe(CrawlerStatus.Idle)
+  })
 
+  describe('crawling preparations', () => {
     it('should have status "CRAWLING" after start() has been called', async () => {
       const { crawler } = makeSut()
       await crawler.start()
