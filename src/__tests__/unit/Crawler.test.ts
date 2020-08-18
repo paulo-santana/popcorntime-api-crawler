@@ -82,13 +82,13 @@ describe('Crawler', () => {
 
   describe('crawling preparations', () => {
     it('should have status "CRAWLING" after start() has been called', async () => {
-      const { crawler } = await await makeSut()
+      const { crawler } = await makeSut()
       await crawler.start()
       expect(crawler.status).toBe(CrawlerStatus.Crawling)
     })
 
-    it('should save last API status on with Storage Manager', async () => {
-      const { crawler, config } = await await makeSut()
+    it('should save last API status with Storage Manager', async () => {
+      const { crawler, config } = await makeSut()
       const saveData = jest.spyOn(config.storageManager, 'saveData')
       await crawler.start()
       const status = await config.apiClients.statusApi.getStatus()
