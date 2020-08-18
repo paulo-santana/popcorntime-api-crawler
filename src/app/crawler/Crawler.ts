@@ -61,6 +61,7 @@ export class Crawler {
   observers: Array<Observer> = []
   private _status: CrawlerStatus = CrawlerStatus.Idle
   private lastApiStatus?: PopcornApiStatus
+  private currentApiStatus?: PopcornApiStatus
 
   private apiClients: ApiClientTypes
   private slugger: ISlugger
@@ -125,13 +126,13 @@ export class Crawler {
 
     this.log('getting API status')
     const { statusApi } = this.apiClients
-    const currentApiStatus = await statusApi.getStatus()
+    this.currentApiStatus = await statusApi.getStatus()
     this.log('getting API status: done!')
 
-    if (!currentApiStatus) throw new Error('Falhou no engano')
-    this.storageManager.saveData(this.apiFile, currentApiStatus)
+    if (!this.currentApiStatus) throw new Error('Falhou no engano')
+    this.storageManager.saveData(this.apiFile, this.currentApiStatus)
 
-    if (currentApiStatus.status !== 'Idle') {
+    if (this.currentApiStatus.status !== 'Idle') {
       this.log('API is not Idle. Stopping crawl')
       this.notifyFor(CrawlerEvents.Stop, CrawlerEventReasons.ApiNotIdle)
       this.stop()
@@ -139,7 +140,7 @@ export class Crawler {
     }
 
     if (this.lastApiStatus) {
-      if (this.lastApiStatus?.updated >= currentApiStatus.updated) {
+      if (this.lastApiStatus.updated >= this.currentApiStatus.updated) {
         this.log('API has no update. Stopping crawl')
         this.stop()
         this.notifyFor(CrawlerEvents.Stop, CrawlerEventReasons.ApiNotUpdated)
@@ -147,23 +148,42 @@ export class Crawler {
       }
     }
 
-    this.lastApiStatus = currentApiStatus
     this.log('starting crawl engines')
     await this.crawl()
 
     this.log('crawling done!')
     this.notifyFor(CrawlerEvents.Stop, CrawlerEventReasons.CrawlingFinished)
+    this.stop()
   }
 
   stop(): void {
     this._status = CrawlerStatus.Idle
+    this.lastApiStatus = this.currentApiStatus
     this.log('crawl stopped')
   }
 
-  async crawl(): Promise<void> {
-    await this.crawlMovies()
-    await this.crawlSeries()
-    await this.crawlAnimes()
+  private async crawl(): Promise<void> {
+    if (!this.currentApiStatus || !this.lastApiStatus) {
+      throw new Error('Impossible error')
+    }
+
+    if (this.currentApiStatus.totalMovies > this.lastApiStatus.totalMovies) {
+      await this.crawlMovies()
+    } else {
+      this.log('(movies) - no new movies, skipping')
+    }
+
+    if (this.currentApiStatus.totalShows > this.lastApiStatus.totalShows) {
+      await this.crawlSeries()
+    } else {
+      this.log('(series) - no new series, skipping')
+    }
+
+    if (this.currentApiStatus.totalAnimes > this.lastApiStatus.totalAnimes) {
+      await this.crawlAnimes()
+    } else {
+      this.log('(animes) - no new animes, skipping')
+    }
   }
 
   subscribe(
