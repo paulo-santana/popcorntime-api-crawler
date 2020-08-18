@@ -45,7 +45,7 @@ export class NodeCronScheduler {
     if (this.jobs) this.jobs.forEach(job => job())
   }
 
-  reschedule(time: string): void {
+  reschedule(time = '0 * * * *'): void {
     this.log(`rescheduling to ${time}`)
     this.scheduledTask.stop()
     this.scheduledTask.destroy()

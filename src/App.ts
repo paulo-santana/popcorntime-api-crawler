@@ -1,3 +1,4 @@
+import dotenv from 'dotenv'
 import { Crawler, CrawlerEvents, CrawlerEventReasons } from './app/crawler'
 import { Slugger, JsonFileEditor } from './utils'
 import {
@@ -15,6 +16,8 @@ import {
 import { MongoHelper } from './data/repositories/helpers/MongoHelper'
 import { NodeCronScheduler } from './app/scheduler/Scheduler'
 
+dotenv.config()
+
 class App {
   async run(): Promise<void> {
     const slugger = new Slugger()
@@ -23,23 +26,23 @@ class App {
     const popcornMoviesAdapter = new PopcornMoviesAdapter()
     const popcornSeriesAdapter = new PopcornSeriesAdapter()
 
-    const statusBaseUrl = 'http://localhost:3333'
+    const statusBaseUrl = process.env.STATUS_BASE_URL as string
     const statusClient = new AxiosHttpClient(statusBaseUrl)
     const statusApi = new StatusApi(statusClient)
 
-    const animeBaseUrl = 'http://localhost:3333'
+    const animeBaseUrl = process.env.ANIME_BASE_URL as string
     const animesClient = new AxiosHttpClient(animeBaseUrl)
     const animesApi = new AnimesApi(animesClient)
 
-    const moviesBaseUrl = 'http://localhost:3333'
+    const moviesBaseUrl = process.env.MOVIE_BASE_URL as string
     const moviesClient = new AxiosHttpClient(moviesBaseUrl)
     const moviesApi = new MoviesApi(moviesClient)
 
-    const seriesBaseUrl = 'http://localhost:3333'
+    const seriesBaseUrl = process.env.SERIES_BASE_URL as string
     const seriesClient = new AxiosHttpClient(seriesBaseUrl)
     const seriesApi = new SeriesApi(seriesClient)
 
-    const mongoUri = 'mongodb://localhost:27017/catalog'
+    const mongoUri = process.env.MONGO_URL as string
 
     await MongoHelper.connect(mongoUri)
 
@@ -70,8 +73,11 @@ class App {
       progressActive: true,
     })
 
-    const scheduler = new NodeCronScheduler('15 6 * * * *') // hourly
-    scheduler.addJob(() => {
+    const { MAIN_CRON, SECONDARY_CRON } = process.env
+    const scheduler = new NodeCronScheduler(MAIN_CRON, {
+      loggingActive: true,
+    })
+    scheduler.addJob(function crawlerStartJob() {
       crawler.start()
     })
 
@@ -88,7 +94,7 @@ class App {
     crawler.subscribe(CrawlerEvents.Stop, reason => {
       switch (reason) {
         case CrawlerEventReasons.ApiNotIdle:
-          scheduler.reschedule('*/2 * * * *') // try again every two minutes
+          scheduler.reschedule(SECONDARY_CRON)
           wasRescheduled = true
           logEvent(reason)
           break
@@ -96,7 +102,7 @@ class App {
         case CrawlerEventReasons.CrawlingFinished:
         default:
           if (wasRescheduled) {
-            scheduler.reschedule('0 * * * *') // back to default
+            scheduler.reschedule(MAIN_CRON) // back to default
             wasRescheduled = false
           }
           logEvent(reason)
