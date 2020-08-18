@@ -7,6 +7,9 @@
   "license": "MIT",
   "private": true,
   "scripts": {
+    "start": "node dist/index.js",
+    "build": "tsc",
+    "postinstall": "yarn build",
     "dev": "ts-node-dev --unhandled-rejections=strict --respawn --transpile-only src/index.ts",
     "test": "jest",
     "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand"
