@@ -41,11 +41,17 @@ export type Observer = {
   observerFunction: (reason: CrawlerEventReasons) => void
 }
 
+export interface IStorageManager {
+  saveData(key: string, data: Record<string, unknown>): Promise<void>
+  getData(key: string): Promise<unknown>
+}
+
 export type CrawlerConfig = {
   apiClients: ApiClientTypes
   slugger: ISlugger
   repositories: RepositoryTypes
   adapters: AdapterTypes
+  storageManager: IStorageManager
   logger?: ILogger
   loggingActive?: boolean
   progressActive?: boolean
@@ -61,6 +67,7 @@ export class Crawler {
   private repositories: RepositoryTypes
   private adapters: AdapterTypes
   private logger: ILogger
+  private storageManager: IStorageManager
 
   private loggingActive: boolean
   private progressActive: boolean
@@ -73,22 +80,30 @@ export class Crawler {
     return this._status
   }
 
-  constructor(config: CrawlerConfig) {
+  private constructor(config: CrawlerConfig) {
     this.apiClients = config.apiClients
     this.slugger = config.slugger
     this.repositories = config.repositories
     this.adapters = config.adapters
 
+    this.storageManager = config.storageManager
+
     this.logger = config.logger || new CatalogLogger()
     this.loggingActive = config.loggingActive || false
     this.progressActive = config.progressActive || false
+  }
 
-    // const lastSavedStatus = JsonFileEditor.getFile<PopcornApiStatus>(
-    //   this.apiFile
-    // )
-    // if (lastSavedStatus) {
-    //   this.lastApiStatus = lastSavedStatus
-    // }
+  static async CreateAsync(config: CrawlerConfig): Promise<Crawler> {
+    const me = new Crawler(config)
+
+    const lastSavedStatus = (await me.storageManager.getData(
+      me.apiFile
+    )) as PopcornApiStatus
+    if (lastSavedStatus) {
+      me.lastApiStatus = lastSavedStatus
+    }
+
+    return me
   }
 
   private log(message: string) {
@@ -114,7 +129,7 @@ export class Crawler {
     this.log('getting API status: done!')
 
     if (!currentApiStatus) throw new Error('Falhou no engano')
-    // JsonFileEditor.saveFile(this.apiFile, currentApiStatus)
+    this.storageManager.saveData(this.apiFile, currentApiStatus)
 
     if (currentApiStatus.status !== 'Idle') {
       this.log('API is not Idle. Stopping crawl')

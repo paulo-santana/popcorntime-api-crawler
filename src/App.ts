@@ -1,5 +1,5 @@
 import { Crawler, CrawlerEvents, CrawlerEventReasons } from './app/crawler'
-import { Slugger } from './utils'
+import { Slugger, JsonFileEditor } from './utils'
 import {
   PopcornAnimesAdapter,
   PopcornMoviesAdapter,
@@ -47,7 +47,7 @@ class App {
     const seriesRepository = new SeriesRepository('series')
     const moviesRepository = new MoviesRepository('movies')
 
-    const crawler = new Crawler({
+    const crawler = await Crawler.CreateAsync({
       slugger,
       adapters: {
         popcornAnimesAdapter,
@@ -65,11 +65,12 @@ class App {
         seriesRepository,
         moviesRepository,
       },
+      storageManager: new JsonFileEditor(),
       loggingActive: true,
       progressActive: true,
     })
 
-    const scheduler = new NodeCronScheduler('15 29 * * * *') // hourly
+    const scheduler = new NodeCronScheduler('15 6 * * * *') // hourly
     scheduler.addJob(() => {
       crawler.start()
     })
