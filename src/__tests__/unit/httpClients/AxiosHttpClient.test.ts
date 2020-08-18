@@ -14,9 +14,10 @@ describe('AxiosHttpClient', () => {
   it('should fetch endpoints and return response as string', async () => {
     const { axiosClient } = makeSut()
     mockedAxios.get.mockResolvedValueOnce({
-      data: JSON.stringify(apiStatusStub),
+      data: apiStatusStub,
     })
     const response = await axiosClient.get('status')
+
     expect(response).toEqual(JSON.stringify(apiStatusStub))
   })
 

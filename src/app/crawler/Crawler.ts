@@ -13,8 +13,8 @@ import {
 } from '@/data/api'
 import { Anime, Movie, Series } from '@/data/models'
 import { IRepository } from '@/data/repositories'
-import { ISlugger, JsonFileEditor } from '@/utils'
-import { Logger } from '../logger/Logger'
+import { ISlugger } from '@/utils'
+import { ILogger, Logger as CatalogLogger } from '../logger/Logger'
 
 import { CrawlerEventReasons, CrawlerEvents, CrawlerStatus } from '.'
 
@@ -46,6 +46,9 @@ export type CrawlerConfig = {
   slugger: ISlugger
   repositories: RepositoryTypes
   adapters: AdapterTypes
+  logger?: ILogger
+  loggingActive?: boolean
+  progressActive?: boolean
 }
 
 export class Crawler {
@@ -57,8 +60,10 @@ export class Crawler {
   private slugger: ISlugger
   private repositories: RepositoryTypes
   private adapters: AdapterTypes
+  private logger: ILogger
 
-  private loggingActive = false
+  private loggingActive: boolean
+  private progressActive: boolean
 
   lastUpdate = 0
 
@@ -74,18 +79,29 @@ export class Crawler {
     this.repositories = config.repositories
     this.adapters = config.adapters
 
-    const lastSavedStatus = JsonFileEditor.getFile<PopcornApiStatus>(
-      this.apiFile
-    )
-    if (lastSavedStatus) {
-      this.lastApiStatus = lastSavedStatus
-    }
+    this.logger = config.logger || new CatalogLogger()
+    this.loggingActive = config.loggingActive || false
+    this.progressActive = config.progressActive || false
+
+    // const lastSavedStatus = JsonFileEditor.getFile<PopcornApiStatus>(
+    //   this.apiFile
+    // )
+    // if (lastSavedStatus) {
+    //   this.lastApiStatus = lastSavedStatus
+    // }
   }
 
   private log(message: string) {
     if (this.loggingActive) {
-      Logger.print('Crawler', message)
+      this.logger.print('Crawler', message)
     }
+  }
+
+  private startProgress(size: number): () => void {
+    if (this.progressActive) {
+      return this.logger.startProgress(size)
+    }
+    return () => ({})
   }
 
   async start(): Promise<void> {
@@ -98,7 +114,7 @@ export class Crawler {
     this.log('getting API status: done!')
 
     if (!currentApiStatus) throw new Error('Falhou no engano')
-    JsonFileEditor.saveFile(this.apiFile, currentApiStatus)
+    // JsonFileEditor.saveFile(this.apiFile, currentApiStatus)
 
     if (currentApiStatus.status !== 'Idle') {
       this.log('API is not Idle. Stopping crawl')
@@ -164,7 +180,7 @@ export class Crawler {
     const { adaptMovies } = this.adapters.popcornMoviesAdapter
     const movies: Movie[] = []
 
-    const tickProgress = Logger.startProgress(pages.length)
+    const tickProgress = this.startProgress(pages.length)
 
     for (let i = 0; i < pages.length; i++) {
       tickProgress()
@@ -227,7 +243,7 @@ export class Crawler {
     const { adaptSeries } = this.adapters.popcornSeriesAdapter
     const series: Series[] = []
 
-    const tickProgress = Logger.startProgress(pages.length)
+    const tickProgress = this.startProgress(pages.length)
 
     for (let i = 0; i < pages.length; i++) {
       tickProgress()
@@ -265,7 +281,7 @@ export class Crawler {
     const { adaptAnimes } = this.adapters.popcornAnimesAdapter
     const animes: Anime[] = []
 
-    const tickProgress = Logger.startProgress(pages.length)
+    const tickProgress = this.startProgress(pages.length)
 
     for (let i = 0; i < pages.length; i++) {
       tickProgress()

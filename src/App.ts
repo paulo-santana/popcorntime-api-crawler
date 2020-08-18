@@ -65,9 +65,11 @@ class App {
         seriesRepository,
         moviesRepository,
       },
+      loggingActive: true,
+      progressActive: true,
     })
 
-    const scheduler = new NodeCronScheduler('50 3 * * * *') // hourly
+    const scheduler = new NodeCronScheduler('15 29 * * * *') // hourly
     scheduler.addJob(() => {
       crawler.start()
     })

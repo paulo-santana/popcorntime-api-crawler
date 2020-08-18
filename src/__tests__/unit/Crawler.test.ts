@@ -104,7 +104,7 @@ describe('Crawler', () => {
   })
 
   describe('notifying', () => {
-    it('should notify observers if stoped with Reason "ApiNotIdle"', async () => {
+    it('should notify observers if stopped with Reason "ApiNotIdle"', async () => {
       const { crawler, config } = makeSut()
       const stopEvent = CrawlerEvents.Stop
       const { ApiNotIdle } = CrawlerEventReasons
@@ -118,7 +118,7 @@ describe('Crawler', () => {
       expect(subscriber).toBeCalledWith(ApiNotIdle)
     })
 
-    it('should notify observers if stoped with Reason "ApiNotUpdated"', async () => {
+    it('should notify observers if stopped with Reason "ApiNotUpdated"', async () => {
       const { crawler } = makeSut()
       const stopEvent = CrawlerEvents.Stop
       const { ApiNotUpdated } = CrawlerEventReasons
@@ -133,7 +133,7 @@ describe('Crawler', () => {
       expect(subscriber).toBeCalledWith(ApiNotUpdated)
     })
 
-    it('should notify observers when completed a crawl sucessfuly', async () => {
+    it('should notify observers when completed a crawl successfully', async () => {
       const { crawler } = makeSut()
       const stopEvent = CrawlerEvents.Stop
       const { CrawlingFinished } = CrawlerEventReasons
