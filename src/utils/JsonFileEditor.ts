@@ -13,7 +13,7 @@ export class JsonFileEditor implements IStorageManager {
           if (error) {
             reject(error)
           }
-          resolve(data)
+          resolve(JSON.parse(data))
         })
       } else {
         resolve()

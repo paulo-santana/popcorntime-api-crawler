@@ -52,6 +52,7 @@ export type CrawlerConfig = {
   repositories: RepositoryTypes
   adapters: AdapterTypes
   storageManager: IStorageManager
+  forceCrawlWhenNotIdle?: boolean
   logger?: ILogger
   loggingActive?: boolean
   progressActive?: boolean
@@ -69,6 +70,8 @@ export class Crawler {
   private adapters: AdapterTypes
   private logger: ILogger
   private storageManager: IStorageManager
+
+  private forceCrawlWhenNotIdle: boolean
 
   private loggingActive: boolean
   private progressActive: boolean
@@ -88,6 +91,8 @@ export class Crawler {
     this.adapters = config.adapters
 
     this.storageManager = config.storageManager
+
+    this.forceCrawlWhenNotIdle = config.forceCrawlWhenNotIdle || false
 
     this.logger = config.logger || new CatalogLogger()
     this.loggingActive = config.loggingActive || false
@@ -132,11 +137,13 @@ export class Crawler {
     if (!this.currentApiStatus) throw new Error('Falhou no engano')
     this.storageManager.saveData(this.apiFile, this.currentApiStatus)
 
-    if (this.currentApiStatus.status !== 'Idle') {
-      this.log('API is not Idle. Stopping crawl')
-      this.notifyFor(CrawlerEvents.Stop, CrawlerEventReasons.ApiNotIdle)
-      this.stop()
-      return
+    if (!this.forceCrawlWhenNotIdle) {
+      if (this.currentApiStatus.status !== 'Idle') {
+        this.log('API is not Idle. Stopping crawl')
+        this.notifyFor(CrawlerEvents.Stop, CrawlerEventReasons.ApiNotIdle)
+        this.stop()
+        return
+      }
     }
 
     if (this.lastApiStatus) {
@@ -164,25 +171,27 @@ export class Crawler {
 
   private async crawl(): Promise<void> {
     if (!this.currentApiStatus || !this.lastApiStatus) {
-      throw new Error('Impossible error')
-    }
-
-    if (this.currentApiStatus.totalMovies > this.lastApiStatus.totalMovies) {
       await this.crawlMovies()
-    } else {
-      this.log('(movies) - no new movies, skipping')
-    }
-
-    if (this.currentApiStatus.totalShows > this.lastApiStatus.totalShows) {
       await this.crawlSeries()
-    } else {
-      this.log('(series) - no new series, skipping')
-    }
-
-    if (this.currentApiStatus.totalAnimes > this.lastApiStatus.totalAnimes) {
       await this.crawlAnimes()
     } else {
-      this.log('(animes) - no new animes, skipping')
+      if (this.currentApiStatus.totalMovies > this.lastApiStatus.totalMovies) {
+        await this.crawlMovies()
+      } else {
+        this.log('(movies) - no new movies, skipping')
+      }
+
+      if (this.currentApiStatus.totalShows > this.lastApiStatus.totalShows) {
+        await this.crawlSeries()
+      } else {
+        this.log('(series) - no new series, skipping')
+      }
+
+      if (this.currentApiStatus.totalAnimes > this.lastApiStatus.totalAnimes) {
+        await this.crawlAnimes()
+      } else {
+        this.log('(animes) - no new animes, skipping')
+      }
     }
   }
 
