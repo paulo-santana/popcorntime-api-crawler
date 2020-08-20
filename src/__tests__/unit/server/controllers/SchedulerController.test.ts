@@ -1,5 +1,10 @@
 interface IScheduler {
-  getStatus(): string
+  getStatus(): SchedulerStatus
+}
+
+type SchedulerStatus = {
+  status: string
+  nextSchedule: Date
 }
 
 const makeSut = () => {
@@ -10,14 +15,19 @@ const makeSut = () => {
       this.scheduler = scheduler
     }
 
-    getSchedulerInfo() {
+    getSchedulerInfo(): SchedulerStatus {
       return this.scheduler.getStatus()
     }
   }
 
   class SchedulerStub implements IScheduler {
-    getStatus(): string {
-      return 'running'
+    getStatus(): SchedulerStatus {
+      const now = new Date()
+      now.setHours(now.getHours() + 1)
+      return {
+        status: 'running',
+        nextSchedule: now,
+      }
     }
   }
 
@@ -33,6 +43,7 @@ describe('Scheduler Controller', () => {
     const getStatus = jest.spyOn(scheduler, 'getStatus')
     const info = sut.getSchedulerInfo()
     expect(getStatus).toHaveBeenCalled()
-    expect(info).toEqual('running')
+    expect(info.status).toBe('running')
+    expect(info.nextSchedule).toBeDefined()
   })
 })
