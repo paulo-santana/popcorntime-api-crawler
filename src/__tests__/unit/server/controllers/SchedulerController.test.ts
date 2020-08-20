@@ -1,10 +1,12 @@
 interface IScheduler {
   getStatus(): SchedulerStatus
   start(): void
+  stop(): void
+  reschedule(schedule: string): void
 }
 
 type SchedulerStatus = {
-  status: string
+  status: 'idle' | 'running'
   nextSchedule: Date | undefined
 }
 
@@ -23,6 +25,14 @@ const makeSut = () => {
     startScheduler(): void {
       this.scheduler.start()
     }
+
+    stopScheduler(): void {
+      this.scheduler.stop()
+    }
+
+    reschedule(schedule: string) {
+      this.scheduler.reschedule(schedule)
+    }
   }
 
   class SchedulerStub implements IScheduler {
@@ -40,6 +50,16 @@ const makeSut = () => {
       now.setHours(now.getHours() + 1)
       this.status.status = 'running'
       this.status.nextSchedule = now
+    }
+
+    stop(): void {
+      this.status.status = 'idle'
+      this.status.nextSchedule = undefined
+    }
+
+    reschedule(schedule: string) {
+      this.status.status = 'running'
+      this.status.nextSchedule = new Date()
     }
 
     getStatus(): SchedulerStatus {
@@ -71,5 +91,21 @@ describe('Scheduler Controller', () => {
     expect(start).toHaveBeenCalled()
     expect(status.status).toBe('running')
     expect(status.nextSchedule).toBeDefined()
+  })
+
+  it('stops scheduler', () => {
+    const { sut, scheduler } = makeSut()
+    const stop = jest.spyOn(scheduler, 'stop')
+    sut.startScheduler()
+    sut.stopScheduler()
+    expect(stop).toHaveBeenCalled()
+  })
+
+  it('sets a new schedule', () => {
+    const { sut, scheduler } = makeSut()
+    const schedule = '* * * * *'
+    const reschedule = jest.spyOn(scheduler, 'reschedule')
+    sut.reschedule(schedule)
+    expect(reschedule).toHaveBeenCalledWith(schedule)
   })
 })
