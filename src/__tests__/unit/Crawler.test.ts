@@ -1,9 +1,4 @@
-import {
-  Crawler,
-  CrawlerEventReasons,
-  CrawlerEvents,
-  CrawlerStatus,
-} from '@/app/crawler'
+import { Crawler, CrawlerEventReasons, CrawlerEvents } from '@/app/crawler'
 import {
   PopcornAnimesAdapter,
   PopcornMoviesAdapter,
@@ -51,7 +46,7 @@ const makeSut = async () => {
       this.data = data
       return Promise.resolve()
     },
-    getData<T>(): Promise<unknown> {
+    getData(): Promise<unknown> {
       if (this.data) {
         return Promise.resolve(this.data)
       }
@@ -75,18 +70,7 @@ const makeSut = async () => {
 }
 
 describe('Crawler', () => {
-  it('should have status "IDLE" upon creation', async () => {
-    const { crawler } = await makeSut()
-    expect(crawler.status).toBe(CrawlerStatus.Idle)
-  })
-
   describe('crawling preparations', () => {
-    it('should have status "CRAWLING" after start() has been called', async () => {
-      const { crawler } = await makeSut()
-      await crawler.start()
-      expect(crawler.status).toBe(CrawlerStatus.Crawling)
-    })
-
     it('should save last API status with Storage Manager', async () => {
       const { crawler, config } = await makeSut()
       const saveData = jest.spyOn(config.storageManager, 'saveData')
@@ -98,25 +82,8 @@ describe('Crawler', () => {
     it('retrieves last saved API status upon creation', async () => {
       const { config } = await makeSut()
       const getData = jest.spyOn(config.storageManager, 'getData')
-      const crawler = await Crawler.CreateAsync(config)
+      await Crawler.CreateAsync(config)
       expect(getData).toHaveBeenCalledTimes(1)
-    })
-
-    it('should not crawl if there was no update on API since last crawl', async () => {
-      const { crawler } = await makeSut()
-      await crawler.start()
-      crawler.stop()
-      await crawler.start()
-      expect(crawler.status).not.toBe(CrawlerStatus.Crawling)
-    })
-
-    it('should crawl if there is an update on API', async () => {
-      const { crawler, config } = await makeSut()
-      await crawler.start()
-      crawler.stop()
-      config.apiClients.statusApi.simulateUpdate()
-      await crawler.start()
-      expect(crawler.status).toBe(CrawlerStatus.Crawling)
     })
 
     it('should getStatus from StatusApi client', async () => {
@@ -126,229 +93,222 @@ describe('Crawler', () => {
       expect(getStatus).toHaveBeenCalled()
     })
 
-    it('must not start crawling if API is not "Idle"', async () => {
-      const { crawler, config } = await makeSut()
-      config.apiClients.statusApi.simulateNotIdle()
-      await crawler.start()
-      expect(crawler.status).not.toBe(CrawlerStatus.Crawling)
-    })
-  })
-
-  describe('notifying', () => {
-    it('should notify observers if stopped with Reason "ApiNotIdle"', async () => {
-      const { crawler, config } = await makeSut()
-      const stopEvent = CrawlerEvents.Stop
-      const { ApiNotIdle } = CrawlerEventReasons
-      const subscriber = jest.fn()
-      crawler.subscribe(stopEvent, subscriber)
-      expect(subscriber).not.toBeCalled()
-
-      config.apiClients.statusApi.simulateNotIdle()
-      await crawler.start()
-      expect(subscriber).toBeCalledTimes(1)
-      expect(subscriber).toBeCalledWith(ApiNotIdle)
-    })
-
-    it('should notify observers if stopped with Reason "ApiNotUpdated"', async () => {
-      const { crawler } = await makeSut()
-      const stopEvent = CrawlerEvents.Stop
-      const { ApiNotUpdated } = CrawlerEventReasons
-      const subscriber = jest.fn()
-      crawler.subscribe(stopEvent, subscriber)
-
-      await crawler.start()
-      expect(subscriber).not.toBeCalledWith(ApiNotUpdated)
-
-      crawler.stop()
-      await crawler.start()
-      expect(subscriber).toBeCalledWith(ApiNotUpdated)
-    })
-
-    it('should notify observers when completed a crawl successfully', async () => {
-      const { crawler } = await makeSut()
-      const stopEvent = CrawlerEvents.Stop
-      const { CrawlingFinished } = CrawlerEventReasons
-
-      const subscriber = jest.fn()
-      crawler.subscribe(stopEvent, subscriber)
-      await crawler.start()
-      expect(subscriber).toBeCalledWith(CrawlingFinished)
-    })
-  })
-
-  describe('crawling', () => {
-    describe('movies', () => {
-      it('should get pages from MoviesApi', async () => {
+    describe('notifying', () => {
+      it('should notify observers if stopped with Reason "ApiNotIdle"', async () => {
         const { crawler, config } = await makeSut()
-        const getPages = jest.spyOn(config.apiClients.moviesApi, 'getPages')
+        const stopEvent = CrawlerEvents.Stop
+        const { ApiNotIdle } = CrawlerEventReasons
+        const subscriber = jest.fn()
+        crawler.subscribe(stopEvent, subscriber)
+        expect(subscriber).not.toBeCalled()
+
+        config.apiClients.statusApi.simulateNotIdle()
         await crawler.start()
-        expect(getPages).toBeCalled()
+        expect(subscriber).toBeCalledTimes(1)
+        expect(subscriber).toBeCalledWith(ApiNotIdle)
       })
 
-      it('should get movies for each page', async () => {
-        const { crawler, config } = await makeSut()
-        const getByPage = jest.spyOn(config.apiClients.moviesApi, 'getByPage')
+      it('should notify observers if stopped with Reason "ApiNotUpdated"', async () => {
+        const { crawler } = await makeSut()
+        const stopEvent = CrawlerEvents.Stop
+        const { ApiNotUpdated } = CrawlerEventReasons
+        const subscriber = jest.fn()
+        crawler.subscribe(stopEvent, subscriber)
+
         await crawler.start()
-        expect(getByPage).toBeCalledTimes(
-          config.apiClients.moviesApi.pages.length
-        )
+        expect(subscriber).not.toBeCalledWith(ApiNotUpdated)
+
+        crawler.stop()
+        await crawler.start()
+        expect(subscriber).toBeCalledWith(ApiNotUpdated)
       })
 
-      it('should adapt all movies from PopcornMovie to Movie model', async () => {
-        const { crawler, config } = await makeSut()
-        const adaptSeries = jest.spyOn(
-          config.adapters.popcornSeriesAdapter,
-          'adaptSeries'
-        )
-        await crawler.start()
-        expect(adaptSeries).toBeCalled()
-      })
+      it('should notify observers when completed a crawl successfully', async () => {
+        const { crawler } = await makeSut()
+        const stopEvent = CrawlerEvents.Stop
+        const { CrawlingFinished } = CrawlerEventReasons
 
-      it('should slug movies after retrieving them', async () => {
-        const { crawler, config } = await makeSut()
-        const slug = jest.spyOn(config.slugger, 'slug')
+        const subscriber = jest.fn()
+        crawler.subscribe(stopEvent, subscriber)
         await crawler.start()
-        expect(slug).toBeCalled()
+        expect(subscriber).toBeCalledWith(CrawlingFinished)
       })
+    })
 
-      it('should slug movies with ID if there are repeated slugs in database', async () => {
-        const { crawler, config } = await makeSut()
-        config.repositories.moviesRepository.moviesPool.push({
-          _id: 'tt0118661',
-          slug: config.slugger.slug('The Avengers'),
-          title: 'The Avengers',
+    describe('crawling', () => {
+      describe('movies', () => {
+        it('should get pages from MoviesApi', async () => {
+          const { crawler, config } = await makeSut()
+          const getPages = jest.spyOn(config.apiClients.moviesApi, 'getPages')
+          await crawler.start()
+          expect(getPages).toBeCalled()
         })
-        const slugWithId = jest.spyOn(config.slugger, 'slugWithId')
-        await crawler.start()
-        expect(slugWithId).toBeCalledWith('The Avengers', 'tt0848228')
+
+        it('should get movies for each page', async () => {
+          const { crawler, config } = await makeSut()
+          const getByPage = jest.spyOn(config.apiClients.moviesApi, 'getByPage')
+          await crawler.start()
+          expect(getByPage).toBeCalledTimes(
+            config.apiClients.moviesApi.pages.length
+          )
+        })
+
+        it('should adapt all movies from PopcornMovie to Movie model', async () => {
+          const { crawler, config } = await makeSut()
+          const adaptSeries = jest.spyOn(
+            config.adapters.popcornSeriesAdapter,
+            'adaptSeries'
+          )
+          await crawler.start()
+          expect(adaptSeries).toBeCalled()
+        })
+
+        it('should slug movies after retrieving them', async () => {
+          const { crawler, config } = await makeSut()
+          const slug = jest.spyOn(config.slugger, 'slug')
+          await crawler.start()
+          expect(slug).toBeCalled()
+        })
+
+        it('should slug movies with ID if there are repeated slugs in database', async () => {
+          const { crawler, config } = await makeSut()
+          config.repositories.moviesRepository.moviesPool.push({
+            _id: 'tt0118661',
+            slug: config.slugger.slug('The Avengers'),
+            title: 'The Avengers',
+          })
+          const slugWithId = jest.spyOn(config.slugger, 'slugWithId')
+          await crawler.start()
+          expect(slugWithId).toBeCalledWith('The Avengers', 'tt0848228')
+        })
+
+        it('should save adapted, new movies into the repository', async () => {
+          const { crawler, config } = await makeSut()
+          const saveMany = jest.spyOn(
+            config.repositories.moviesRepository,
+            'saveMany'
+          )
+          await crawler.start()
+          expect(saveMany).toBeCalled()
+          expect(config.repositories.moviesRepository.moviesPool).toHaveLength(
+            config.apiClients.moviesApi.popcornMovies.length
+          )
+        })
+
+        it('should save only movies that are new to database', async () => {
+          const { crawler, config } = await makeSut()
+          const newMovies = config.repositories.moviesRepository.simulatePreviousCrawlAndReturnUnsavedMovies()
+          const saveMany = jest.spyOn(
+            config.repositories.moviesRepository,
+            'saveMany'
+          )
+          await crawler.start()
+          expect(saveMany).toBeCalledWith(newMovies)
+        })
       })
 
-      it('should save adapted, new movies into the repository', async () => {
-        const { crawler, config } = await makeSut()
-        const saveMany = jest.spyOn(
-          config.repositories.moviesRepository,
-          'saveMany'
-        )
-        await crawler.start()
-        expect(saveMany).toBeCalled()
-        expect(config.repositories.moviesRepository.moviesPool).toHaveLength(
-          config.apiClients.moviesApi.popcornMovies.length
-        )
+      describe('series', () => {
+        it('should get pages from SeriesApi', async () => {
+          const { crawler, config } = await makeSut()
+          const getPages = jest.spyOn(config.apiClients.seriesApi, 'getPages')
+          await crawler.start()
+          expect(getPages).toBeCalled()
+        })
+
+        it('should get series for each page', async () => {
+          const { crawler, config } = await makeSut()
+          const getByPage = jest.spyOn(config.apiClients.seriesApi, 'getByPage')
+          await crawler.start()
+          expect(getByPage).toBeCalledTimes(
+            config.apiClients.seriesApi.pages.length
+          )
+        })
+
+        it('should adapt all series from PopcornShow to Series model', async () => {
+          const { crawler, config } = await makeSut()
+          const adaptMovies = jest.spyOn(
+            config.adapters.popcornSeriesAdapter,
+            'adaptSeries'
+          )
+          await crawler.start()
+          expect(adaptMovies).toBeCalled()
+        })
+
+        it('should save adapted, new series into the repository', async () => {
+          const { crawler, config } = await makeSut()
+          const saveMany = jest.spyOn(
+            config.repositories.seriesRepository,
+            'saveMany'
+          )
+          await crawler.start()
+          expect(saveMany).toBeCalled()
+          expect(config.repositories.seriesRepository.seriesPool).toHaveLength(
+            config.apiClients.seriesApi.popcornShows.length
+          )
+        })
+
+        it('should save only series that are new to database', async () => {
+          const { crawler, config } = await makeSut()
+          const newMovies = config.repositories.seriesRepository.simulatePreviousCrawlAndReturnUnsavedSeries()
+          const saveMany = jest.spyOn(
+            config.repositories.seriesRepository,
+            'saveMany'
+          )
+          await crawler.start()
+          expect(saveMany).toBeCalledWith(newMovies)
+        })
       })
 
-      it('should save only movies that are new to database', async () => {
-        const { crawler, config } = await makeSut()
-        const newMovies = config.repositories.moviesRepository.simulatePreviousCrawlAndReturnUnsavedMovies()
-        const saveMany = jest.spyOn(
-          config.repositories.moviesRepository,
-          'saveMany'
-        )
-        await crawler.start()
-        expect(saveMany).toBeCalledWith(newMovies)
-      })
-    })
+      describe('animes', () => {
+        it('should get pages from AnimesApi', async () => {
+          const { crawler, config } = await makeSut()
+          const getPages = jest.spyOn(config.apiClients.animesApi, 'getPages')
+          await crawler.start()
+          expect(getPages).toBeCalled()
+        })
 
-    describe('series', () => {
-      it('should get pages from SeriesApi', async () => {
-        const { crawler, config } = await makeSut()
-        const getPages = jest.spyOn(config.apiClients.seriesApi, 'getPages')
-        await crawler.start()
-        expect(getPages).toBeCalled()
-      })
+        it('should get animes for each page', async () => {
+          const { crawler, config } = await makeSut()
+          const getByPage = jest.spyOn(config.apiClients.animesApi, 'getByPage')
+          await crawler.start()
+          expect(getByPage).toBeCalledTimes(
+            config.apiClients.animesApi.pages.length
+          )
+        })
 
-      it('should get series for each page', async () => {
-        const { crawler, config } = await makeSut()
-        const getByPage = jest.spyOn(config.apiClients.seriesApi, 'getByPage')
-        await crawler.start()
-        expect(getByPage).toBeCalledTimes(
-          config.apiClients.seriesApi.pages.length
-        )
-      })
+        it('should adapt all animes from PopcornAnime to Animes model', async () => {
+          const { crawler, config } = await makeSut()
+          const adaptAnimes = jest.spyOn(
+            config.adapters.popcornAnimesAdapter,
+            'adaptAnimes'
+          )
+          await crawler.start()
+          expect(adaptAnimes).toBeCalled()
+        })
 
-      it('should adapt all series from PopcornShow to Series model', async () => {
-        const { crawler, config } = await makeSut()
-        const adaptMovies = jest.spyOn(
-          config.adapters.popcornSeriesAdapter,
-          'adaptSeries'
-        )
-        await crawler.start()
-        expect(adaptMovies).toBeCalled()
-      })
+        it('should save adapted, new animes into the repository', async () => {
+          const { crawler, config } = await makeSut()
+          const saveMany = jest.spyOn(
+            config.repositories.animesRepository,
+            'saveMany'
+          )
+          await crawler.start()
+          expect(saveMany).toBeCalled()
+          expect(config.repositories.animesRepository.animesPool).toHaveLength(
+            config.apiClients.animesApi.popcornAnimes.length
+          )
+        })
 
-      it('should save adapted, new series into the repository', async () => {
-        const { crawler, config } = await makeSut()
-        const saveMany = jest.spyOn(
-          config.repositories.seriesRepository,
-          'saveMany'
-        )
-        await crawler.start()
-        expect(saveMany).toBeCalled()
-        expect(config.repositories.seriesRepository.seriesPool).toHaveLength(
-          config.apiClients.seriesApi.popcornShows.length
-        )
-      })
-
-      it('should save only series that are new to database', async () => {
-        const { crawler, config } = await makeSut()
-        const newMovies = config.repositories.seriesRepository.simulatePreviousCrawlAndReturnUnsavedSeries()
-        const saveMany = jest.spyOn(
-          config.repositories.seriesRepository,
-          'saveMany'
-        )
-        await crawler.start()
-        expect(saveMany).toBeCalledWith(newMovies)
-      })
-    })
-
-    describe('animes', () => {
-      it('should get pages from AnimesApi', async () => {
-        const { crawler, config } = await makeSut()
-        const getPages = jest.spyOn(config.apiClients.animesApi, 'getPages')
-        await crawler.start()
-        expect(getPages).toBeCalled()
-      })
-
-      it('should get animes for each page', async () => {
-        const { crawler, config } = await makeSut()
-        const getByPage = jest.spyOn(config.apiClients.animesApi, 'getByPage')
-        await crawler.start()
-        expect(getByPage).toBeCalledTimes(
-          config.apiClients.animesApi.pages.length
-        )
-      })
-
-      it('should adapt all animes from PopcornAnime to Animes model', async () => {
-        const { crawler, config } = await makeSut()
-        const adaptAnimes = jest.spyOn(
-          config.adapters.popcornAnimesAdapter,
-          'adaptAnimes'
-        )
-        await crawler.start()
-        expect(adaptAnimes).toBeCalled()
-      })
-
-      it('should save adapted, new animes into the repository', async () => {
-        const { crawler, config } = await makeSut()
-        const saveMany = jest.spyOn(
-          config.repositories.animesRepository,
-          'saveMany'
-        )
-        await crawler.start()
-        expect(saveMany).toBeCalled()
-        expect(config.repositories.animesRepository.animesPool).toHaveLength(
-          config.apiClients.animesApi.popcornAnimes.length
-        )
-      })
-
-      it('should save only animes that are new to database', async () => {
-        const { crawler, config } = await makeSut()
-        const newAnimes = config.repositories.animesRepository.simulatePreviousCrawlAndReturnUnsavedAnimes()
-        const saveMany = jest.spyOn(
-          config.repositories.animesRepository,
-          'saveMany'
-        )
-        await crawler.start()
-        expect(saveMany).toBeCalledWith(newAnimes)
+        it('should save only animes that are new to database', async () => {
+          const { crawler, config } = await makeSut()
+          const newAnimes = config.repositories.animesRepository.simulatePreviousCrawlAndReturnUnsavedAnimes()
+          const saveMany = jest.spyOn(
+            config.repositories.animesRepository,
+            'saveMany'
+          )
+          await crawler.start()
+          expect(saveMany).toBeCalledWith(newAnimes)
+        })
       })
     })
   })
