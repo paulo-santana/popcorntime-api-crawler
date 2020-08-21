@@ -1,40 +1,7 @@
-interface IScheduler {
-  getStatus(): SchedulerStatus
-  start(): void
-  stop(): void
-  reschedule(schedule: string): void
-}
-
-type SchedulerStatus = {
-  status: 'idle' | 'running'
-  nextSchedule: Date | undefined
-}
+import { SchedulerController } from '@/app/server/controllers'
+import { IScheduler, SchedulerStatus } from '@/app/scheduler/IScheduler'
 
 const makeSut = () => {
-  class SchedulerController {
-    scheduler: IScheduler
-
-    constructor(scheduler: IScheduler) {
-      this.scheduler = scheduler
-    }
-
-    getSchedulerInfo(): SchedulerStatus {
-      return this.scheduler.getStatus()
-    }
-
-    startScheduler(): void {
-      this.scheduler.start()
-    }
-
-    stopScheduler(): void {
-      this.scheduler.stop()
-    }
-
-    reschedule(schedule: string) {
-      this.scheduler.reschedule(schedule)
-    }
-  }
-
   class SchedulerStub implements IScheduler {
     status: SchedulerStatus
 
