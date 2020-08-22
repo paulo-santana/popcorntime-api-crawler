@@ -14,7 +14,7 @@ import {
   MoviesRepository,
 } from './data/repositories'
 import { MongoHelper } from './data/repositories/helpers/MongoHelper'
-import { NodeCronScheduler } from './app/scheduler/Scheduler'
+import { NodeCronScheduler } from './app/scheduler'
 
 dotenv.config()
 
