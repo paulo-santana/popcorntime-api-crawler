@@ -1,5 +1,5 @@
 import nodeCron, { ScheduledTask, ScheduleOptions } from 'node-cron'
-import { NodeCronScheduler } from '@/app/scheduler/Scheduler'
+import { NodeCronScheduler } from '@/app/scheduler'
 import { mocked } from 'ts-jest/utils'
 
 class ScheduledTaskSpy implements ScheduledTask {
@@ -45,16 +45,21 @@ jest.mock('node-cron', () => {
 const mockedNodeCron = mocked(nodeCron, true)
 
 const makeSut = () => {
-  const scheduler = new NodeCronScheduler()
+  class TestNodeCronScheduler extends NodeCronScheduler {
+    getJobs() {
+      return this.jobs
+    }
+  }
+  const scheduler = new TestNodeCronScheduler()
   return { scheduler }
 }
 
-describe('Scheduler', () => {
+describe('NodeCron Scheduler', () => {
   it('adds jobs to run', () => {
     const { scheduler } = makeSut()
     const job = jest.fn()
     scheduler.addJob(job)
-    expect(scheduler.jobs).toContain(job)
+    expect(scheduler.getJobs()).toContain(job)
   })
 
   it('runs jobs at scheduled time', () => {
@@ -62,7 +67,7 @@ describe('Scheduler', () => {
     const job = jest.fn()
     scheduler.addJob(job)
     scheduler.start()
-    expect(scheduler.jobs).toContain(job)
+    expect(scheduler.getJobs()).toContain(job)
     expect(job).toBeCalled()
   })
 
@@ -88,5 +93,22 @@ describe('Scheduler', () => {
     expect(stop).toBeCalled()
     expect(destroy).toBeCalled()
     expect(schedule).toBeCalled()
+  })
+
+  describe('status', () => {
+    it('updates status according to command', () => {
+      const { scheduler } = makeSut()
+      const status = scheduler.getStatus()
+      expect(status.status).toBe('idle')
+      scheduler.start()
+      expect(status.status).toBe('running')
+      expect(status.nextSchedule).toBeDefined()
+      scheduler.stop()
+      expect(status.status).toBe('idle')
+      expect(status.nextSchedule).toBeUndefined()
+      scheduler.reschedule('* * * * *')
+      expect(status.status).toBe('running')
+      expect(status.nextSchedule).toBeDefined()
+    })
   })
 })
