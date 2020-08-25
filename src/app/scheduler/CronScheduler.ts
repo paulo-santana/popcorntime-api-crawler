@@ -20,7 +20,7 @@ export class CronScheduler extends BaseScheduler {
   }
 
   getNextSchedule(): Date {
-    return new Date()
+    return this.scheduledTask.nextDate().toDate()
   }
 
   reschedule(schedule: string): void {
