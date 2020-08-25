@@ -1,11 +1,12 @@
 import cron from 'cron'
 import { BaseScheduler } from '@/app/scheduler'
+import { SchedulerConfigTypes } from './BaseScheduler'
 
 export class CronScheduler extends BaseScheduler {
   scheduledTask: cron.CronJob
 
-  constructor(schedule = '0 * * * *') {
-    super()
+  constructor(schedule = '0 * * * *', config?: SchedulerConfigTypes) {
+    super(config)
     this.scheduledTask = new cron.CronJob(schedule, () => this.runJobs())
   }
 
