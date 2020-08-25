@@ -121,14 +121,16 @@ export class Crawler {
     }
   }
 
-  private startProgress(size: number): (current?: number) => void {
+  private startProgress(
+    size: number
+  ): (prefix?: string, current?: number) => void {
     if (this.progressActive) {
       if (this.progressType === 'progress') {
         return this.logger.startProgress(size)
       }
 
-      return (current?: number) => {
-        this.log(`downloading page ${current}/${size}`)
+      return (prefix?: string, current?: number) => {
+        this.log(`${prefix} - downloading page ${current}/${size}`)
       }
     }
     return () => ({})
@@ -236,7 +238,7 @@ export class Crawler {
     const tickProgress = this.startProgress(pages.length)
 
     for (let i = 0; i < pages.length; i++) {
-      tickProgress(i + 1)
+      tickProgress('(movies)', i + 1)
       const page = pages[i]
       // eslint-disable-next-line no-await-in-loop
       const popcornMovies = await moviesApi.getByPage(page)
@@ -299,7 +301,7 @@ export class Crawler {
     const tickProgress = this.startProgress(pages.length)
 
     for (let i = 0; i < pages.length; i++) {
-      tickProgress(i + 1)
+      tickProgress('(series)', i + 1)
       const page = pages[i]
       const foundShows = await seriesApi.getByPage(page)
       const adaptedSeries = adaptSeries(foundShows)
@@ -337,7 +339,7 @@ export class Crawler {
     const tickProgress = this.startProgress(pages.length)
 
     for (let i = 0; i < pages.length; i++) {
-      tickProgress(i + 1)
+      tickProgress('(animes)', i + 1)
       const page = pages[i]
       const foundAnimes = await animesApi.getByPage(page)
       const adaptedAnimes = adaptAnimes(foundAnimes)
