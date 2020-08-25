@@ -56,6 +56,7 @@ export type CrawlerConfig = {
   logger?: ILogger
   loggingActive?: boolean
   progressActive?: boolean
+  progressType?: string
 }
 
 export class Crawler {
@@ -75,6 +76,7 @@ export class Crawler {
 
   private loggingActive: boolean
   private progressActive: boolean
+  private progressType: string
 
   lastUpdate = 0
 
@@ -97,6 +99,7 @@ export class Crawler {
     this.logger = config.logger || new CatalogLogger()
     this.loggingActive = config.loggingActive || false
     this.progressActive = config.progressActive || false
+    this.progressType = config.progressType || 'progress'
   }
 
   static async CreateAsync(config: CrawlerConfig): Promise<Crawler> {
@@ -118,9 +121,15 @@ export class Crawler {
     }
   }
 
-  private startProgress(size: number): () => void {
+  private startProgress(size: number): (current?: number) => void {
     if (this.progressActive) {
-      return this.logger.startProgress(size)
+      if (this.progressType === 'progress') {
+        return this.logger.startProgress(size)
+      }
+
+      return (current?: number) => {
+        this.log(`downloading page ${current}/${size}`)
+      }
     }
     return () => ({})
   }
@@ -227,7 +236,7 @@ export class Crawler {
     const tickProgress = this.startProgress(pages.length)
 
     for (let i = 0; i < pages.length; i++) {
-      tickProgress()
+      tickProgress(i + 1)
       const page = pages[i]
       // eslint-disable-next-line no-await-in-loop
       const popcornMovies = await moviesApi.getByPage(page)
@@ -290,7 +299,7 @@ export class Crawler {
     const tickProgress = this.startProgress(pages.length)
 
     for (let i = 0; i < pages.length; i++) {
-      tickProgress()
+      tickProgress(i + 1)
       const page = pages[i]
       const foundShows = await seriesApi.getByPage(page)
       const adaptedSeries = adaptSeries(foundShows)
@@ -328,7 +337,7 @@ export class Crawler {
     const tickProgress = this.startProgress(pages.length)
 
     for (let i = 0; i < pages.length; i++) {
-      tickProgress()
+      tickProgress(i + 1)
       const page = pages[i]
       const foundAnimes = await animesApi.getByPage(page)
       const adaptedAnimes = adaptAnimes(foundAnimes)

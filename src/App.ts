@@ -63,7 +63,7 @@ class App {
     const seriesRepository = new SeriesRepository('series')
     const moviesRepository = new MoviesRepository('movies')
 
-    const { FORCE_CRAWL_WHEN_NOT_IDLE } = process.env
+    const { FORCE_CRAWL_WHEN_NOT_IDLE, PROGRESS_TYPE } = process.env
     const crawler = await Crawler.CreateAsync({
       slugger,
       adapters: {
@@ -86,6 +86,7 @@ class App {
       loggingActive: true,
       progressActive: true,
       forceCrawlWhenNotIdle: !!FORCE_CRAWL_WHEN_NOT_IDLE,
+      progressType: PROGRESS_TYPE,
     })
 
     const { MAIN_CRON, SECONDARY_CRON } = process.env
