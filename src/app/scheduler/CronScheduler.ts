@@ -1,6 +1,5 @@
 import cron from 'cron'
-import { BaseScheduler } from '@/app/scheduler'
-import { SchedulerConfigTypes } from './BaseScheduler'
+import { SchedulerConfigTypes, BaseScheduler } from './BaseScheduler'
 
 export class CronScheduler extends BaseScheduler {
   scheduledTask: cron.CronJob
