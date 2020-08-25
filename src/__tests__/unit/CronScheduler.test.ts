@@ -17,6 +17,14 @@ jest.mock('cron', () => {
     stop() {}
 
     setTime(time: CronTime) {}
+
+    nextDate(): { toDate: () => Date } {
+      const next = new Date(2020, 10, 10, 10, 10, 10, 100)
+      next.setHours(next.getHours() + 1)
+      return {
+        toDate: () => next,
+      }
+    }
   }
 
   return {
@@ -88,6 +96,13 @@ describe('Cron Scheduler', () => {
       scheduler.reschedule('* * * * *')
       expect(scheduler.getStatus().status).toBe('running')
       expect(scheduler.getStatus().nextSchedule).toBeDefined()
+    })
+
+    it('returns next schedule correctly', () => {
+      const { scheduler } = makeSut()
+      scheduler.start()
+      const nextSchedule = scheduler.getNextSchedule()
+      expect(nextSchedule).toEqual(scheduler.scheduledTask.nextDate().toDate())
     })
   })
 })
