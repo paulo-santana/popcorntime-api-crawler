@@ -29,6 +29,7 @@ export abstract class BaseScheduler implements IScheduler {
   }
 
   getStatus(): SchedulerStatus {
+    this.status.nextSchedule = this.getNextSchedule()
     return this.status
   }
 
