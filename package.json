@@ -10,7 +10,7 @@
     "start": "node dist/index.js",
     "build": "tsc",
     "postinstall": "yarn build",
-    "dev": "ts-node-dev --unhandled-rejections=strict --respawn --transpile-only src/index.ts",
+    "dev": "ts-node-dev --unhandled-rejections=strict --respawn --transpile-only -r tsconfig-paths/register src/index.ts",
     "test": "jest",
     "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand"
   },
@@ -44,6 +44,7 @@
     "prettier": "^2.0.5",
     "ts-jest": "^26.1.4",
     "ts-node-dev": "^1.0.0-pre.57",
+    "tsconfig-paths": "^3.9.0",
     "typescript": "^3.9.7"
   }
 }
