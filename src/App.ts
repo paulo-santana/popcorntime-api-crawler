@@ -130,7 +130,7 @@ class App {
     })
 
     const { CRAWL_ON_STARTUP } = process.env
-    if (CRAWL_ON_STARTUP && CRAWL_ON_STARTUP === 'yes') await crawler.start()
+    if (CRAWL_ON_STARTUP && CRAWL_ON_STARTUP === 'yes') crawler.start()
 
     scheduler.start()
     this.startServer(scheduler)
