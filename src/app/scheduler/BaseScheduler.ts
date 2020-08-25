@@ -31,10 +31,11 @@ export abstract class BaseScheduler implements IScheduler {
   getStatus(): SchedulerStatus {
     return this.status
   }
+
   start(): void {
     this.status.status = 'running'
     this.status.nextSchedule = this.getNextSchedule()
-    this.log(`schedule started!`)
+    this.log(`scheduler started!`)
   }
 
   abstract getNextSchedule(): Date
