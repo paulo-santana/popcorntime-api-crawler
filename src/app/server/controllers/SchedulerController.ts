@@ -1,5 +1,11 @@
 import { IScheduler, SchedulerStatus } from '@/app/scheduler/IScheduler'
 
+export type SchedulerControllerCommands =
+  | 'start'
+  | 'stop'
+  | 'reschedule'
+  | 'getInfo'
+
 export class SchedulerController {
   scheduler: IScheduler
 
