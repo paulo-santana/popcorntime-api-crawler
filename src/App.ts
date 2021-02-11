@@ -104,7 +104,7 @@ class App {
 
     const logEvent = (reason: CrawlerEventReasons) => {
       if (reason === CrawlerEventReasons.CrawlingFinished) {
-        console.log('Funcionou porra!!')
+        console.log('It worked!!')
       } else {
         console.log(`Crawling stopped due to reason: "${reason}"`)
         console.log('Rescheduling...')
